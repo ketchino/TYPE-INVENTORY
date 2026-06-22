@@ -1,0 +1,54 @@
+Copyright © 2026 ketchino
+All rights reserved.
+
+This work ("TYPE://INVENTORY") was created with the assistance of AI tools.
+The copyright claimed herein covers the author's original creative
+contribution, including but not limited to: the concept's specific
+implementation, structure, design choices, original content and text
+created by the author, organization, and any modifications or
+refinements made by the author to the generated material. This excludes
+any third-party data or intellectual property, as specified below.
+
+This license protects the specific implementation of this software only.
+It does NOT grant the author any exclusive right over the general idea,
+concept, or functionality. Anyone remains free to independently create
+different software with similar or the same functionality, provided
+they do not copy this specific code, design, or content.
+
+DATA DISCLAIMER:
+Trade value data displayed by this software is sourced from a
+community-maintained public Google Sheet provided by The Trade Hub
+Discord community (discord.gg/thetradehub) and/or derived from it. This
+data is not claimed as original work of this project's author and
+remains the property of its original compilers/contributors. Used with
+their permission.
+
+THIRD-PARTY IP DISCLAIMER:
+This software is an unofficial, non-profit, fan-made tool related to
+"Type Soul" (a Roblox game) and the "Bleach" franchise. All character
+names, game names, and related intellectual property referenced within
+this software belong to their respective owners. This project is not
+affiliated with, endorsed by, or connected to Type Soul, Bleach, Roblox,
+or their respective rights holders. No license or claim is made over
+this third-party intellectual property.
+
+NO WARRANTY / LIMITATION OF LIABILITY:
+This software is provided "as is", without warranty of any kind, express
+or implied. The author makes no guarantee regarding the accuracy,
+completeness, or timeliness of any trade value or data displayed
+(including data sourced from third parties, see Data Disclaimer above).
+The author is not responsible or liable for any loss, damage, bad trade,
+or other consequence resulting from the use of this software or
+reliance on the information it displays. Use of this software is at
+your own risk.
+
+Unless authorized in writing by the author, it is expressly prohibited to:
+- copy, reproduce, or distribute this specific work, in whole or in part;
+- modify, adapt, or create derivative works based on this specific code;
+- use this specific work for commercial purposes;
+- republish this specific work, even free of charge, on other platforms.
+
+Any unauthorized use of this specific work constitutes an infringement
+of the author's rights and may be prosecuted under applicable law.
+
+For usage requests, open an issue
