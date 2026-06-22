@@ -183,16 +183,49 @@ body.vpanel-open #canvas{margin-right:var(--panel-w);}
 .menu-dropdown .md-label{color:inherit;}
 
 /* total value */
-#total-value{font-size:13px;font-weight:700;color:#f1c40f;letter-spacing:.05em;margin-left:8px;padding:4px 10px;background:rgba(241,196,15,0.12);border:1px solid rgba(241,196,15,0.25);border-radius:5px;white-space:nowrap;text-shadow:0 0 8px rgba(241,196,15,0.3);transition:transform .15s ease;}
+#total-value{font-size:13px;font-weight:700;color:#f1c40f;letter-spacing:.05em;margin-left:8px;padding:4px 10px;background:rgba(241,196,15,0.12);border:1px solid rgba(241,196,15,0.25);border-radius:5px;white-space:nowrap;text-shadow:0 0 8px rgba(241,196,15,0.3);transition:all .15s ease;cursor:default;}
+#total-value:hover{border-color:var(--theme-accent);background:rgba(241,196,15,0.18);box-shadow:0 0 8px rgba(241,196,15,0.2);}
 /* (sync-status element removed — feature no longer exists) */
+
+/* ===== MY KAN badge (top-right, next to total value) ===== */
+#my-kan-wrap{position:relative;flex-shrink:0;}
+.my-kan-btn{background:rgba(46,204,113,0.12);border:1px solid rgba(46,204,113,0.3);color:#2ecc71;font-size:12px;font-weight:700;font-family:inherit;letter-spacing:.04em;padding:4px 10px;border-radius:5px;cursor:pointer;display:flex;align-items:center;gap:4px;white-space:nowrap;text-shadow:0 0 8px rgba(46,204,113,0.3);transition:all .15s ease;}
+.my-kan-btn:hover{background:rgba(46,204,113,0.2);border-color:var(--theme-accent);box-shadow:0 0 8px rgba(46,204,113,0.25);}
+.my-kan-btn.active{background:rgba(46,204,113,0.25);border-color:var(--theme-accent);}
+.my-kan-icon{font-size:13px;opacity:.95;font-weight:800;}
+.my-kan-unit{font-size:10px;opacity:.7;font-weight:600;}
+
+/* ===== MY KAN WINDOW (movable, like Trade Calc/Wishlist) ===== */
+.mk-win .win-body{display:flex;flex-direction:column;padding:0;overflow:hidden;}
+.mk-body{flex:1;overflow-y:auto;padding:8px;}
+.mk-body::-webkit-scrollbar{width:3px;}
+.mk-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+.mk-section{padding:8px 0;}
+.mk-section+.mk-section{border-top:1px solid var(--border);margin-top:4px;padding-top:12px;}
+.mk-section-title{font-size:10px;font-weight:600;color:#2ecc71;letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px;}
+.mk-current{font-size:20px;font-weight:700;color:#2ecc71;text-align:center;padding:8px 0;}
+.mk-networth-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted);margin-top:4px;padding-top:8px;border-top:1px dashed var(--border);}
+.mk-networth{color:var(--val-gold);font-weight:700;}
+.mk-input-row{display:flex;gap:4px;}
+.mk-input-row input{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:12px;font-family:inherit;padding:6px 8px;outline:none;min-width:0;}
+.mk-input-row input:focus{border-color:#2ecc71;}
+.mk-set-btn{background:#2ecc71;border:1px solid #2ecc71;color:#fff;padding:6px 12px;border-radius:3px;cursor:pointer;font-size:11px;font-family:inherit;font-weight:600;flex-shrink:0;}
+.mk-set-btn:hover{background:#27ae60;border-color:#27ae60;}
+.mk-quick-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+.mk-quick-btn{background:var(--bg3);border:1px solid var(--border2);color:var(--text);padding:6px 0;border-radius:3px;cursor:pointer;font-size:10px;font-family:inherit;font-weight:600;transition:all .12s;}
+.mk-quick-btn:hover{background:rgba(46,204,113,0.15);border-color:#2ecc71;color:#2ecc71;}
+.mk-quick-btn.remove:hover{background:rgba(231,76,60,0.15);border-color:#e74c3c;color:#e74c3c;}
+.mk-actions{display:flex;justify-content:flex-end;}
+.mk-reset-btn{background:none;border:1px solid var(--border2);color:var(--muted);padding:5px 12px;border-radius:3px;cursor:pointer;font-size:10px;font-family:inherit;font-weight:500;}
+.mk-reset-btn:hover{border-color:#e74c3c;color:#e74c3c;background:rgba(231,76,60,0.08);}
 
 /* discord fields */
 /* (Discord CSS for trading/lf input fields removed — feature no longer exists) */
 
 /* search */
 #search-wrap{position:relative;margin-left:6px;}
-#search{background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:12px;font-family:inherit;padding:4px 8px 4px 24px;outline:none;width:130px;transition:border-color .15s,width .15s;}
-#search:focus{border-color:var(--red-dim);width:180px;}
+#search{background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:12px;font-family:inherit;padding:4px 8px 4px 24px;outline:none;width:200px;transition:border-color .15s,width .15s;}
+#search:focus{border-color:var(--red-dim);width:260px;}
 #search::placeholder{color:var(--dim);}
 #search-icon{position:absolute;left:7px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:11px;pointer-events:none;}
 
@@ -359,6 +392,11 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
 .tc-item-del{background:none;border:1px solid #1e1e1e;color:#444;width:14px;height:14px;border-radius:3px;cursor:pointer;font-size:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:all .1s;}
 .tc-item-del:hover{color:var(--red);border-color:var(--red-dim);}
 .tc-empty{color:var(--dim);font-size:10px;padding:6px;text-align:center;font-style:italic;}
+.tc-kan-row{display:flex;align-items:center;gap:6px;padding:4px 8px;border-top:1px solid var(--border);background:var(--bg3);flex-shrink:0;}
+.tc-kan-label{font-size:10px;font-weight:600;color:var(--val-gold);letter-spacing:.04em;white-space:nowrap;}
+.tc-kan-input{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--val-gold);font-size:11px;font-family:inherit;font-weight:600;padding:3px 6px;outline:none;text-align:right;min-width:0;-moz-appearance:textfield;}
+.tc-kan-input:focus{border-color:var(--val-gold);}
+.tc-kan-input::-webkit-inner-spin-button,.tc-kan-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 .tc-addrow{display:flex;gap:3px;padding:4px 5px 3px;border-top:1px solid var(--border);flex-shrink:0;position:relative;}
 .tc-add-input{flex:1;min-width:0;background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;font-family:inherit;padding:3px 5px;outline:none;}
 .tc-add-input:focus{border-color:var(--red-dim);}
@@ -385,18 +423,18 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
 .tc-clear-btn:hover{border-color:var(--red-dim);color:var(--text);}
 
 /* quick add bar */
-#quick-add-wrap{display:none;align-items:center;gap:6px;margin-left:auto;}
+#quick-add-wrap{display:none;align-items:center;gap:6px;margin-right:auto;}
 #quick-add-wrap.visible{display:flex;}
 .quick-add-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--val-green);white-space:nowrap;}
 #quick-add-area{position:relative;}
-#quick-add-input{background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:12px;font-family:inherit;padding:4px 8px;outline:none;width:200px;transition:border-color .15s,width .15s;}
-#quick-add-input:focus{border-color:var(--val-green);width:280px;}
+#quick-add-input{background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:12px;font-family:inherit;padding:4px 8px;outline:none;width:280px;transition:border-color .15s,width .15s;}
+#quick-add-input:focus{border-color:var(--val-green);width:360px;}
 #quick-add-input::placeholder{color:var(--dim);}
 #quick-add-qty{font-size:11px;}
 #quick-add-qty:focus{border-color:var(--val-green);}
 .quick-add-btn{background:#1a6b3c;border:1px solid #1a6b3c;color:#fff;padding:4px 8px;border-radius:3px;cursor:pointer;font-size:12px;font-family:inherit;font-weight:500;transition:all .15s;white-space:nowrap;}
 .quick-add-btn:hover{background:#228b4a;border-color:#228b4a;}
-#quick-add-ac{position:absolute;bottom:100%;left:0;width:320px;background:var(--input-bg);border:1px solid var(--border2);border-radius:4px;max-height:220px;overflow-y:auto;z-index:1100;display:none;margin-bottom:2px;box-shadow:0 -4px 16px rgba(0,0,0,.5);}
+#quick-add-ac{position:absolute;top:100%;left:0;width:400px;background:var(--input-bg);border:1px solid var(--border2);border-radius:4px;max-height:260px;overflow-y:auto;z-index:1100;display:none;margin-top:2px;box-shadow:0 4px 16px rgba(0,0,0,.5);}
 #quick-add-ac.show{display:block;}
 #quick-add-ac::-webkit-scrollbar{width:3px;}
 #quick-add-ac::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
@@ -623,6 +661,11 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
       </div>
     </div>
     <span id="total-value"></span>
+    <div id="my-kan-wrap">
+      <button id="my-kan-btn" class="my-kan-btn" type="button" aria-label="My KAN" onclick="event.stopPropagation();toggleMyKan(this)">
+        <span class="my-kan-icon">$</span><span id="my-kan-value">0</span><span class="my-kan-unit">KAN</span>
+      </button>
+    </div>
     <input type="file" id="import-file" accept=".txt" style="display:none" onchange="doImportTxt(this)">
     <div id="info-box-wrap">
       <button id="info-box-btn" class="tbtn info-btn" type="button" aria-label="Info" onclick="event.stopPropagation();toggleInfoBox(this)">ℹ</button>
@@ -640,7 +683,7 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
     </div>
     <div id="search-wrap">
       <span id="search-icon">⌕</span>
-      <input id="search" placeholder="Cerca..." oninput="doSearch(this.value)">
+      <input id="search" placeholder="Cerca nell'inventario" oninput="doSearch(this.value)">
     </div>
   </div>
   <div id="topbar-row2">
@@ -745,7 +788,7 @@ const I18N={
   "tradeValues":{it:"Valori Trade (KAN)",en:"Trade Values (KAN)"},
   "searchValue":{it:"Cerca valore...",en:"Search value..."},
   // Search
-  "search":{it:"Cerca...",en:"Search..."},
+  "search":{it:"Cerca nell'inventario",en:"Search in Inventory"},
   // Quick add
   "quickAddLabel":{it:"+ Aggiungi",en:"+ Add"},
   "addBtn":{it:"Aggiungi",en:"Add"},
@@ -842,6 +885,9 @@ const I18N={
   "noTradeHistory":{it:"Nessuna trade registrata",en:"No trades recorded"},
   "totalTrades":{it:"Scambi totali",en:"Total trades"},
   "netProfitLoss":{it:"Profitto/perdita netto",en:"Net profit/loss"},
+  "tcProfit":{it:"PROFITTO",en:"PROFIT"},
+  "tcLoss":{it:"PERDITA",en:"LOSS"},
+  "tcEven":{it:"PARI",en:"EVEN"},
   // Toasts
   "exportDone":{it:"TXT esportato",en:"TXT exported"},
   "noDataFound":{it:"Nessun dato trovato nel file",en:"No data found in file"},
@@ -855,6 +901,19 @@ const I18N={
   "infoValuesText":{it:"I valori mostrati non sono in KAN reali. Sono unit\u00e0 relative basate sul fatto che uno Shikai RR = 1k valore. Quindi ad esempio un Dullahan Vial a 800k di valore NON equivale a 800k KAN reali.",en:"The values shown are not actual KAN. They are relative units based on a Shikai RR = 1k value. So for example a Dullahan Vial being 800k value is NOT actually 800k KAN."},
   "infoSourceTitle":{it:"Fonte dei valori",en:"Values source"},
   "infoSourceText":{it:"I valori provengono dalla \u201cTrade Hub Value List\u201d fornita da discord.gg/thetradehub. Vai a dare un'occhiata al loro lavoro \u2014 senza la loro lista, questo strumento non sarebbe possibile.",en:"Values are provided by the \u201cTrade Hub Value List\u201d from discord.gg/thetradehub. Go check them out \u2014 this work wouldn't be possible without their list."},
+  // My KAN badge + popover
+  "myKanTitle":{it:"I miei KAN",en:"My KAN"},
+  "myKanNetWorth":{it:"Patrimonio totale",en:"Net Worth"},
+  "myKanSetLabel":{it:"Imposta valore esatto",en:"Set exact value"},
+  "myKanQuickAdd":{it:"Aggiungi rapidamente",en:"Quick add"},
+  "myKanQuickRemove":{it:"Sottrai rapidamente",en:"Quick remove"},
+  "myKanReset":{it:"Azzera",en:"Reset"},
+  "myKanSaved":{it:"KAN aggiornati!",en:"KAN updated!"},
+  "myKanTooltipInv":{it:"Valore oggetti nell'inventario",en:"Inventory items value"},
+  "myKanTooltipMine":{it:"KAN reali posseduti (in banca + inventario di gioco)",en:"Actual KAN you own (bank + in-game inventory)"},
+  // Trade Calc KAN
+  "tcKanLabel":{it:"+ KAN",en:"+ KAN"},
+  "tcKanPlaceholder":{it:"0",en:"0"},
 };
 
 function t(key){return I18N[key]?I18N[key][LANG]||I18N[key].it:key;}
@@ -923,6 +982,8 @@ function applyLang(){
     const key=el.getAttribute('data-i18n');
     if(key)el.textContent=t(key);
   });
+  // Re-sync My KAN tooltips (they use translated strings)
+  if(typeof updateMyKanDisplay==='function')updateMyKanDisplay();
   // Settings modal
   const settingsH3=document.querySelector('#settings-header h3');
   if(settingsH3)settingsH3.textContent=t('settingsTitle');
@@ -969,6 +1030,7 @@ function applyLang(){
     if(wlVisible&&wlWin)refreshWishlist();
     renderHistory();
     if(tcWin&&tcWin.parentNode)rebuildTradeCalcLang();
+    if(mkWin&&mkWin.parentNode)rebuildMyKanLang();
     buildThemeSettings();
   }
 }
@@ -2000,9 +2062,10 @@ function renderAll(){
   const data=loadData();
   const layout=loadLayout();
   const canvas=document.getElementById('canvas');
-  // Preserve special windows (tcWin, wlWin) across the canvas wipe
+  // Preserve special windows (tcWin, wlWin, mkWin) across the canvas wipe
   if(tcWin&&tcWin.parentNode===canvas)canvas.removeChild(tcWin);
   if(wlWin&&wlWin.parentNode===canvas)canvas.removeChild(wlWin);
+  if(mkWin&&mkWin.parentNode===canvas)canvas.removeChild(mkWin);
   canvas.innerHTML='';
   const defPos=defaultPos(data);
   const totalVal=calcTotalValue();
@@ -2117,6 +2180,7 @@ function renderAll(){
 
   if(tcWin)canvas.appendChild(tcWin);
   if(wlWin)canvas.appendChild(wlWin);
+  if(mkWin)canvas.appendChild(mkWin);
   updateTotalDisplay();
   expandCanvas();
 }
@@ -2262,6 +2326,213 @@ function closeInfoBox(){
   if(popover)popover.classList.remove('show');
   const btn=document.getElementById('info-box-btn');
   if(btn)btn.classList.remove('active');
+}
+
+/* ===== MY KAN (movable window, like Trade Calc/Wishlist) =====
+   Stored in localStorage as a single number. The user can:
+   - Set an exact value via input field
+   - Quick-add: +100, +1k, +10k, +100k, +1M
+   - Quick-remove: -100, -1k, -10k, -100k, -1M
+   - Reset to 0
+   The badge displays the current value. Net Worth (Inventory Value + My KAN)
+   is shown inside the window and as a tooltip on both badges. */
+const MY_KAN_KEY='bleach_my_kan_v1';
+const MK_POS_KEY='bleach_mk_pos_v1';
+let mkWin=null;
+let mkVisible=false;
+function loadMyKan(){
+  try{return parseInt(localStorage.getItem(MY_KAN_KEY)||'0',10)||0;}
+  catch{return 0;}
+}
+function saveMyKan(v){
+  const n=Math.max(0,Math.floor(v||0));
+  localStorage.setItem(MY_KAN_KEY,String(n));
+  updateMyKanDisplay();
+}
+function loadMkPos(){
+  try{const r=localStorage.getItem(MK_POS_KEY);return r?JSON.parse(r):null;}
+  catch{return null;}
+}
+function saveMkPos(p){localStorage.setItem(MK_POS_KEY,JSON.stringify(p));}
+function updateMyKanDisplay(){
+  const v=loadMyKan();
+  const invVal=calcTotalValue();
+  const net=invVal+v;
+  // Badge text
+  const badge=document.getElementById('my-kan-value');
+  if(badge)badge.textContent=formatValue(v);
+  // Window elements (only if window exists)
+  const cur=document.getElementById('mk-current-val');
+  if(cur)cur.textContent=v.toLocaleString();
+  const netEl=document.getElementById('mk-networth-val');
+  if(netEl)netEl.textContent=formatValue(net)+' KAN';
+  const input=document.getElementById('mk-input');
+  if(input&&document.activeElement!==input)input.value=v;
+  // Tooltips on both badges (in theme, no "relative units" disclaimer)
+  const myKanBtn=document.getElementById('my-kan-btn');
+  if(myKanBtn)myKanBtn.title=t('myKanTooltipMine')+'\n'+t('myKanNetWorth')+': '+formatValue(net)+' KAN';
+  const invBtn=document.getElementById('total-value');
+  if(invBtn)invBtn.title=t('myKanTooltipInv')+'\n'+t('myKanNetWorth')+': '+formatValue(net)+' KAN';
+}
+function toggleMyKan(btn){
+  mkVisible=!mkVisible;
+  if(btn)btn.classList.toggle('active',mkVisible);
+  if(mkVisible){
+    if(!mkWin)buildMyKanWin();
+    if(mkWin)mkWin.style.display='';
+  } else {
+    if(mkWin)mkWin.style.display='none';
+  }
+  const s=loadSettings();s.mkVisible=mkVisible;saveSettings(s);
+}
+function closeMyKanWin(){
+  if(!mkWin)return;
+  mkWin.style.display='none';
+  mkVisible=false;
+  const btn=document.getElementById('my-kan-btn');
+  if(btn)btn.classList.remove('active');
+  const s=loadSettings();s.mkVisible=false;saveSettings(s);
+}
+function buildMyKanWin(){
+  const pos=loadMkPos()||{x:60,y:120,w:280,h:380};
+  const win=document.createElement('div');
+  win.className='win mk-win';
+  win.id='win-mykan';
+  win.style.cssText=`left:${pos.x}px;top:${pos.y}px;width:${pos.w}px;height:${pos.h}px;display:${mkVisible?'':'none'};`;
+  const hdr=document.createElement('div');
+  hdr.className='win-header';
+  hdr.innerHTML=`<span class="win-title" style="color:#2ecc71">$ ${t('myKanTitle')}</span><div class="win-header-right"><button class="win-close" title="${t('close')||'Close'}" onclick="closeMyKanWin()">\u00d7</button></div>`;
+  win.appendChild(hdr);
+  const bodyWrap=document.createElement('div');
+  bodyWrap.className='win-body';
+  const body=document.createElement('div');
+  body.className='mk-body';
+  body.innerHTML=`
+    <div class="mk-section">
+      <div class="mk-section-title">$ ${t('myKanTitle')}</div>
+      <div class="mk-current"><span id="mk-current-val">0</span> KAN</div>
+      <div class="mk-networth-row">
+        <span>${t('myKanNetWorth')}:</span>
+        <span id="mk-networth-val" class="mk-networth">0 KAN</span>
+      </div>
+    </div>
+    <div class="mk-section">
+      <div class="mk-section-title">${t('myKanSetLabel')}</div>
+      <div class="mk-input-row">
+        <input type="number" id="mk-input" min="0" step="any" placeholder="0">
+        <button class="mk-set-btn" onclick="setMyKan()">${t('myKanSetLabel')}</button>
+      </div>
+    </div>
+    <div class="mk-section">
+      <div class="mk-section-title">${t('myKanQuickAdd')}</div>
+      <div class="mk-quick-grid">
+        <button class="mk-quick-btn" onclick="addMyKan(100)">+100</button>
+        <button class="mk-quick-btn" onclick="addMyKan(1000)">+1k</button>
+        <button class="mk-quick-btn" onclick="addMyKan(10000)">+10k</button>
+        <button class="mk-quick-btn" onclick="addMyKan(100000)">+100k</button>
+        <button class="mk-quick-btn" onclick="addMyKan(1000000)">+1M</button>
+      </div>
+    </div>
+    <div class="mk-section">
+      <div class="mk-section-title">${t('myKanQuickRemove')}</div>
+      <div class="mk-quick-grid">
+        <button class="mk-quick-btn remove" onclick="addMyKan(-100)">−100</button>
+        <button class="mk-quick-btn remove" onclick="addMyKan(-1000)">−1k</button>
+        <button class="mk-quick-btn remove" onclick="addMyKan(-10000)">−10k</button>
+        <button class="mk-quick-btn remove" onclick="addMyKan(-100000)">−100k</button>
+        <button class="mk-quick-btn remove" onclick="addMyKan(-1000000)">−1M</button>
+      </div>
+    </div>
+    <div class="mk-section mk-actions">
+      <button class="mk-reset-btn" onclick="resetMyKan()">${t('myKanReset')}</button>
+    </div>`;
+  bodyWrap.appendChild(body);
+  win.appendChild(bodyWrap);
+  const resizer=document.createElement('div');
+  resizer.className='resizer';
+  resizer.innerHTML='<svg width="14" height="14" viewBox="0 0 14 14"><path d="M12 2L2 12M12 6L6 12M12 10L10 12" stroke="#555" stroke-width="1.2" fill="none"/></svg>';
+  win.appendChild(resizer);
+  document.getElementById('canvas').appendChild(win);
+  mkWin=win;
+  makeMkDraggable(win,hdr);
+  makeMkResizable(win,resizer);
+  updateMyKanDisplay();
+  // Enter key on input sets the value
+  const input=document.getElementById('mk-input');
+  if(input){
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();setMyKan();}});
+  }
+}
+function makeMkDraggable(win,handle){
+  let dx,dy,dragging=false;
+  handle.addEventListener('mousedown',e=>{
+    if(e.target.closest('.win-close,.mk-set-btn,.mk-quick-btn,.mk-reset-btn,.mk-input-row input'))return;
+    dragging=true;dx=e.clientX-win.offsetLeft;dy=e.clientY-win.offsetTop;
+    win.classList.add('dragging');win.style.zIndex=10;e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!dragging)return;
+    win.style.left=Math.max(0,e.clientX-dx)+'px';
+    win.style.top=Math.max(0,e.clientY-dy)+'px';
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!dragging)return;
+    dragging=false;win.classList.remove('dragging');win.style.zIndex='';
+    saveMkPos({x:win.offsetLeft,y:win.offsetTop,w:win.offsetWidth,h:win.offsetHeight});
+    expandCanvas();
+  });
+  handle.addEventListener('touchstart',e=>{
+    if(e.target.closest('.win-close,.mk-set-btn,.mk-quick-btn,.mk-reset-btn,.mk-input-row input'))return;
+    const t=e.touches[0];dx=t.clientX-win.offsetLeft;dy=t.clientY-win.offsetTop;
+    dragging=true;win.classList.add('dragging');win.style.zIndex=10;
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(!dragging)return;
+    const t=e.touches[0];
+    win.style.left=Math.max(0,t.clientX-dx)+'px';
+    win.style.top=Math.max(0,t.clientY-dy)+'px';
+    e.preventDefault();
+  },{passive:false});
+  document.addEventListener('touchend',()=>{
+    if(!dragging)return;
+    dragging=false;win.classList.remove('dragging');win.style.zIndex='';
+    saveMkPos({x:win.offsetLeft,y:win.offsetTop,w:win.offsetWidth,h:win.offsetHeight});
+    expandCanvas();
+  });
+}
+function makeMkResizable(win,handle){
+  let sx,sy,sw,sh,resizing=false;
+  handle.addEventListener('mousedown',e=>{
+    resizing=true;sx=e.clientX;sy=e.clientY;sw=win.offsetWidth;sh=win.offsetHeight;
+    e.preventDefault();e.stopPropagation();
+  });
+  document.addEventListener('mousemove',e=>{
+    if(!resizing)return;
+    win.style.width=Math.max(220,sw+(e.clientX-sx))+'px';
+    win.style.height=Math.max(200,sh+(e.clientY-sy))+'px';
+  });
+  document.addEventListener('mouseup',()=>{
+    if(!resizing)return;
+    resizing=false;
+    saveMkPos({x:win.offsetLeft,y:win.offsetTop,w:win.offsetWidth,h:win.offsetHeight});
+    expandCanvas();
+  });
+}
+function setMyKan(){
+  const input=document.getElementById('mk-input');
+  if(!input)return;
+  const v=parseInt(input.value,10);
+  if(isNaN(v)||v<0){toast(t('myKanSaved'));return;}
+  saveMyKan(v);
+  toast(t('myKanSaved'));
+}
+function addMyKan(delta){
+  const cur=loadMyKan();
+  saveMyKan(cur+delta);
+}
+function resetMyKan(){
+  saveMyKan(0);
+  toast(t('myKanSaved'));
 }
 function toggleQuickAddRow(){
   const row2=document.getElementById('topbar-row2');
@@ -2564,7 +2835,7 @@ function copyDiscord(btn){
    contents; that was a privacy/security concern. Removed entirely. */
 
 /* ===== TRADE CALCULATOR ===== */
-let tcData={give:[],receive:[]};
+let tcData={give:[],receive:[],giveKan:0,receiveKan:0};
 let tcAcIdx=-1;
 let tcWin=null;
 let tcVisible=false;
@@ -2630,10 +2901,72 @@ function rebuildTradeCalcLang(){
   // Result label
   const resultLabel=document.querySelector('.tc-result-label');
   if(resultLabel)resultLabel.textContent=t('result');
+  // KAN labels + placeholders (Trade Calc KAN fields)
+  document.querySelectorAll('.tc-kan-label').forEach(el=>el.textContent=t('tcKanLabel'));
+  document.querySelectorAll('.tc-kan-input').forEach(el=>el.placeholder=t('tcKanPlaceholder'));
   // Re-render sides so empty placeholders get translated
   tcRenderSide('give');
   tcRenderSide('receive');
   tcUpdateResult();
+}
+
+/* Updates i18n strings in an existing My KAN window without destroying it.
+   Called from applyLang() when the user toggles language. */
+function rebuildMyKanLang(){
+  if(!mkWin)return;
+  const title=mkWin.querySelector('.win-title');
+  if(title)title.innerHTML='$ '+t('myKanTitle');
+  const closeBtn=mkWin.querySelector('.win-close');
+  if(closeBtn)closeBtn.title=t('close')||'Close';
+  // Rebuild the body with translated strings
+  const body=mkWin.querySelector('.mk-body');
+  if(!body)return;
+  const v=loadMyKan();
+  const invVal=calcTotalValue();
+  const net=invVal+v;
+  body.innerHTML=`
+    <div class="mk-section">
+      <div class="mk-section-title">$ ${t('myKanTitle')}</div>
+      <div class="mk-current"><span id="mk-current-val">${v.toLocaleString()}</span> KAN</div>
+      <div class="mk-networth-row">
+        <span>${t('myKanNetWorth')}:</span>
+        <span id="mk-networth-val" class="mk-networth">${formatValue(net)} KAN</span>
+      </div>
+    </div>
+    <div class="mk-section">
+      <div class="mk-section-title">${t('myKanSetLabel')}</div>
+      <div class="mk-input-row">
+        <input type="number" id="mk-input" min="0" step="any" placeholder="0" value="${v}">
+        <button class="mk-set-btn" onclick="setMyKan()">${t('myKanSetLabel')}</button>
+      </div>
+    </div>
+    <div class="mk-section">
+      <div class="mk-section-title">${t('myKanQuickAdd')}</div>
+      <div class="mk-quick-grid">
+        <button class="mk-quick-btn" onclick="addMyKan(100)">+100</button>
+        <button class="mk-quick-btn" onclick="addMyKan(1000)">+1k</button>
+        <button class="mk-quick-btn" onclick="addMyKan(10000)">+10k</button>
+        <button class="mk-quick-btn" onclick="addMyKan(100000)">+100k</button>
+        <button class="mk-quick-btn" onclick="addMyKan(1000000)">+1M</button>
+      </div>
+    </div>
+    <div class="mk-section">
+      <div class="mk-section-title">${t('myKanQuickRemove')}</div>
+      <div class="mk-quick-grid">
+        <button class="mk-quick-btn remove" onclick="addMyKan(-100)">−100</button>
+        <button class="mk-quick-btn remove" onclick="addMyKan(-1000)">−1k</button>
+        <button class="mk-quick-btn remove" onclick="addMyKan(-10000)">−10k</button>
+        <button class="mk-quick-btn remove" onclick="addMyKan(-100000)">−100k</button>
+        <button class="mk-quick-btn remove" onclick="addMyKan(-1000000)">−1M</button>
+      </div>
+    </div>
+    <div class="mk-section mk-actions">
+      <button class="mk-reset-btn" onclick="resetMyKan()">${t('myKanReset')}</button>
+    </div>`;
+  const input=document.getElementById('mk-input');
+  if(input){
+    input.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();setMyKan();}});
+  }
 }
 
 function buildTradeCalcWin(){
@@ -2652,7 +2985,7 @@ function buildTradeCalcWin(){
   body.style.cssText='display:flex;flex-direction:column;padding:0;overflow:hidden;';
   const tcBody=document.createElement('div');
   tcBody.className='tc-body';tcBody.id='tc-body';
-  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0 KAN</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0 KAN</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
+  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0 KAN</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-give-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" value="0" oninput="tcSetKan('give',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0 KAN</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-receive-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" value="0" oninput="tcSetKan('receive',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
   body.appendChild(tcBody);
   const result=document.createElement('div');
   result.className='tc-result';result.id='tc-result';
@@ -2674,7 +3007,7 @@ function buildTradeCalcWin(){
 function makeTcDraggable(win,handle){
   let dx,dy,dragging=false;
   handle.addEventListener('mousedown',e=>{
-    if(e.target.closest('.tc-confirm-btn,.tc-clear-btn,.tc-btn-add,.tc-add-input,.step-btn,.step-input'))return;
+    if(e.target.closest('.tc-confirm-btn,.tc-clear-btn,.tc-btn-add,.tc-add-input,.tc-kan-input,.step-btn,.step-input'))return;
     dragging=true;dx=e.clientX-win.offsetLeft;dy=e.clientY-win.offsetTop;
     win.classList.add('dragging');win.style.zIndex=10;e.preventDefault();
   });
@@ -2689,7 +3022,7 @@ function makeTcDraggable(win,handle){
     saveTcPos(win.offsetLeft,win.offsetTop);expandCanvas();
   });
   handle.addEventListener('touchstart',e=>{
-    if(e.target.closest('.tc-confirm-btn,.tc-clear-btn,.tc-btn-add,.tc-add-input,.step-btn,.step-input'))return;
+    if(e.target.closest('.tc-confirm-btn,.tc-clear-btn,.tc-btn-add,.tc-add-input,.tc-kan-input,.step-btn,.step-input'))return;
     const t=e.touches[0];dx=t.clientX-win.offsetLeft;dy=t.clientY-win.offsetTop;
     dragging=true;win.classList.add('dragging');win.style.zIndex=10;
   },{passive:true});
@@ -2727,8 +3060,22 @@ function makeTcResizable(win,handle){
 }
 
 function clearTradeCalc(){
-  tcData={give:[],receive:[]};
+  tcData={give:[],receive:[],giveKan:0,receiveKan:0};
+  // Reset KAN input fields too
+  const gk=document.getElementById('tc-give-kan');
+  if(gk)gk.value='0';
+  const rk=document.getElementById('tc-receive-kan');
+  if(rk)rk.value='0';
   tcRenderSide('give');tcRenderSide('receive');tcUpdateResult();
+}
+
+/* Sets the KAN amount for one side of the trade calc. Called from the
+   oninput handler on the .tc-kan-input fields. */
+function tcSetKan(side,value){
+  const v=parseInt(value,10);
+  tcData[side+'Kan']=isNaN(v)?0:Math.max(0,v);
+  tcRenderSide(side);
+  tcUpdateResult();
 }
 
 function setupTcAutocomplete(side){
@@ -2827,13 +3174,25 @@ function tcRenderSide(side){
       container.appendChild(row);
     });
   }
-  totalEl.textContent=formatValue(total)+' KAN';
+  // Add KAN (real KAN) to the side total
+  const kan=tcData[side+'Kan']||0;
+  total+=kan;
+  // Show breakdown if KAN > 0: "1.2M + 500k KAN = 1.7M KAN"
+  if(kan>0){
+    const itemsTotal=total-kan;
+    totalEl.textContent=formatValue(itemsTotal)+' + '+formatValue(kan)+' KAN';
+  } else {
+    totalEl.textContent=formatValue(total)+' KAN';
+  }
 }
 
 function tcUpdateResult(){
   let giveTotal=0,receiveTotal=0;
   tcData.give.forEach(i=>{giveTotal+=(i.val||getTradeValue(i.name))*i.qty;});
   tcData.receive.forEach(i=>{receiveTotal+=(i.val||getTradeValue(i.name))*i.qty;});
+  // Add real KAN to each side
+  giveTotal+=tcData.giveKan||0;
+  receiveTotal+=tcData.receiveKan||0;
   const diff=receiveTotal-giveTotal;
   const valEl=document.getElementById('tc-result-value');
   const detailEl=document.getElementById('tc-result-detail');
@@ -2842,9 +3201,9 @@ function tcUpdateResult(){
   }
   const prefix=diff>0?'+':'';
   valEl.textContent=prefix+formatValue(diff)+' KAN';
-  if(diff>0){valEl.className='tc-result-value profit';detailEl.textContent='PROFITTO';}
-  else if(diff<0){valEl.className='tc-result-value loss';detailEl.textContent='PERDITA';}
-  else{valEl.className='tc-result-value even';detailEl.textContent='PARI';}
+  if(diff>0){valEl.className='tc-result-value profit';detailEl.textContent=t('tcProfit');}
+  else if(diff<0){valEl.className='tc-result-value loss';detailEl.textContent=t('tcLoss');}
+  else{valEl.className='tc-result-value even';detailEl.textContent=t('tcEven');}
 }
 
 /* Guess section for new items */
@@ -2968,9 +3327,21 @@ function quickAddItem(){
   const d=loadData();
   const sec=guessSection(name);
   if(!d[sec])d[sec]=[];
-  const ex=d[sec].find(i=>i.name.toLowerCase()===name.toLowerCase());
+  // Look up the canonical name from TRADE_VALUES (case-insensitive) so that
+  // typing "ghost vial" stores "Ghost Vial" with the correct capitalization.
+  let canonicalName=name;
+  const lower=name.toLowerCase();
+  for(const k of Object.keys(TRADE_VALUES)){
+    if(k.toLowerCase()===lower){canonicalName=k;break;}
+  }
+  // Also check aliases (resolved canonical names)
+  if(TRADE_ALIASES&&TRADE_ALIASES[name]){
+    const aliasTarget=TRADE_ALIASES[name];
+    if(TRADE_VALUES[aliasTarget])canonicalName=aliasTarget;
+  }
+  const ex=d[sec].find(i=>i.name.toLowerCase()===canonicalName.toLowerCase());
   if(ex){ex.qty+=qty;toast(`"${ex.name}" ${t('updatedIn')} ${sec}`);}
-  else{d[sec].push({name,qty});toast(`"${name}" ${t('addedIn')} ${sec}`);}
+  else{d[sec].push({name:canonicalName,qty});toast(`"${canonicalName}" ${t('addedIn')} ${sec}`);}
   saveData(d);refreshWin(sec);
   input.value='';qtyInput.value='1';input.focus();
   document.getElementById('quick-add-ac').classList.remove('show');
@@ -3065,6 +3436,8 @@ updateTotalDisplay();
 applyLang();
 setTimeout(updateTotalDisplay, 500);
 syncSheetValues();
+// Initialize My KAN badge display (load from localStorage)
+updateMyKanDisplay();
 
 /* ===== DISABLE RIGHT-CLICK CONTEXT MENU =====
    Prevents the browser's native context menu from appearing anywhere on the
@@ -3122,8 +3495,10 @@ setTimeout(()=>{recomputeLayout();},200);
       document.body.classList.add('vpanel-open');
     }
   }
-  // Quick Add row
-  if(s.quickAddOpen){
+  // Quick Add row — open by default (so users see it exists)
+  // s.quickAddOpen===undefined means first-time visit → default to open
+  const quickAddShouldOpen = s.quickAddOpen===undefined ? true : s.quickAddOpen;
+  if(quickAddShouldOpen){
     const row2=document.getElementById('topbar-row2');
     const qa=document.getElementById('quick-add-wrap');
     if(row2&&qa){
@@ -3154,6 +3529,16 @@ setTimeout(()=>{recomputeLayout();},200);
       btn.classList.add('active');
     }
   }
+  // My KAN window visibility
+  if(s.mkVisible){
+    const btn=document.getElementById('my-kan-btn');
+    if(btn){
+      mkVisible=true;
+      buildMyKanWin();
+      if(mkWin)mkWin.style.display='';
+      btn.classList.add('active');
+    }
+  }
 })();
 
 /* Save all UI state on page unload/reload */
@@ -3170,6 +3555,7 @@ window.addEventListener('beforeunload',function(){
   delete s.discLf;
   s.tcVisible=tcVisible;
   s.wlVisible=wlVisible;
+  s.mkVisible=mkVisible;
   saveSettings(s);
 });
 
@@ -3614,6 +4000,8 @@ function updateTotalDisplay(){
     animCurrentVal=0;
     el.textContent='0 KAN';
   }
+  // Also update My KAN badge + Net Worth tooltip (inventory value changed)
+  if(typeof updateMyKanDisplay==='function')updateMyKanDisplay();
 }
 function animateValue(){
   const el=document.getElementById('total-value');
