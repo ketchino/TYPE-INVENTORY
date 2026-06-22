@@ -4,7 +4,7 @@ A fan-made inventory & trading tool for **Type Soul** (Roblox).
 
 Built because I was tired of updating my trade list manually every time, set the font, the color, etc... so I made this up.
 
-**[Live demo](https://ketchino.github.io/TYPE://INVENTORY/)**
+**[Live demo](https://ketchino.github.io/TYPE_INVENTORY.html/)**
 
 The demo above is good for trying it out, but I'd recommend downloading the file instead for regular use — GitHub Pages previews aren't guaranteed to stay online forever, while a downloaded copy is yours to keep no matter what.
 
@@ -39,7 +39,7 @@ The Export TXT feature is meant for backing up **your own** inventory.
 
 ## Security
 
-This tool is plain HTML/CSS/JavaScript with no build step — anyone can open it in a text editor and read exactly what it does, there's nothing hidden or compiled. If you want third-party confirmation it's clean, here's a VirusTotal scan of the file: **[VirusTotal report](#)**
+This tool is plain HTML/CSS/JavaScript with no build step — anyone can open it in a text editor and read exactly what it does, there's nothing hidden or compiled. If you want third-party confirmation it's clean, here's a VirusTotal scan of the file: **[VirusTotal report](https://www.virustotal.com/gui/file/4e6f2c58eb314bc144dbe43b26b818e3da22eabe3357c378b10966bf9dca2ff1/detection)**
 
 ## Tech
 
