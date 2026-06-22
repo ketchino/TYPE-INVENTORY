@@ -190,11 +190,26 @@ body.vpanel-open #canvas{margin-right:var(--panel-w);}
 /* (Discord CSS for trading/lf input fields removed — feature no longer exists) */
 
 /* search */
-#search-wrap{position:relative;margin-left:auto;}
+#search-wrap{position:relative;margin-left:6px;}
 #search{background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:12px;font-family:inherit;padding:4px 8px 4px 24px;outline:none;width:130px;transition:border-color .15s,width .15s;}
 #search:focus{border-color:var(--red-dim);width:180px;}
 #search::placeholder{color:var(--dim);}
 #search-icon{position:absolute;left:7px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:11px;pointer-events:none;}
+
+/* ===== INFO BOX (top-right, next to search bar) ===== */
+#info-box-wrap{position:relative;flex-shrink:0;margin-left:auto;}
+.info-btn{width:22px;height:22px;padding:0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;line-height:1;border:1px solid var(--muted);background:transparent;color:var(--muted);}
+.info-btn:hover{border-color:var(--theme-accent);color:var(--theme-accent);background:var(--red-glow);}
+.info-btn.active{border-color:var(--theme-accent);color:var(--theme-accent);background:var(--red-glow);}
+.info-popover{display:none;position:fixed;top:42px;right:8px;width:340px;max-width:calc(100vw - 16px);background:var(--bg2);border:1px solid var(--theme-accent);border-radius:6px;padding:10px 12px;box-shadow:0 8px 32px rgba(0,0,0,.65),0 0 0 1px var(--bg2);z-index:2100;}
+.info-popover.show{display:block;animation:infoFadeIn .15s ease;}
+@keyframes infoFadeIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+.info-section{padding:6px 0;}
+.info-section+.info-section{border-top:1px solid var(--border);margin-top:4px;padding-top:10px;}
+.info-section-title{font-size:11px;font-weight:600;color:var(--theme-accent);letter-spacing:.04em;margin-bottom:4px;}
+.info-section-text{font-size:11px;color:var(--text);line-height:1.55;font-weight:400;}
+.info-link{display:inline-block;margin-top:5px;font-size:11px;color:var(--theme-accent);text-decoration:none;font-weight:500;border-bottom:1px dotted var(--theme-accent);}
+.info-link:hover{opacity:.85;}
 
 /* bottombar */
 #bottombar{position:fixed;bottom:0;left:0;right:0;background:var(--input-bg);border-top:1px solid var(--border);z-index:1000;padding:0 10px;display:flex;align-items:center;justify-content:center;height:32px;transition:right .25s ease;}
@@ -609,6 +624,20 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
     </div>
     <span id="total-value"></span>
     <input type="file" id="import-file" accept=".txt" style="display:none" onchange="doImportTxt(this)">
+    <div id="info-box-wrap">
+      <button id="info-box-btn" class="tbtn info-btn" type="button" aria-label="Info" onclick="event.stopPropagation();toggleInfoBox(this)">ℹ</button>
+      <div id="info-box-popover" class="info-popover">
+        <div class="info-section">
+          <div class="info-section-title">⚠ <span data-i18n="infoValuesTitle"></span></div>
+          <div class="info-section-text" data-i18n="infoValuesText"></div>
+        </div>
+        <div class="info-section">
+          <div class="info-section-title">📜 <span data-i18n="infoSourceTitle"></span></div>
+          <div class="info-section-text" data-i18n="infoSourceText"></div>
+          <a href="https://discord.gg/thetradehub" target="_blank" rel="noopener noreferrer" class="info-link">discord.gg/thetradehub</a>
+        </div>
+      </div>
+    </div>
     <div id="search-wrap">
       <span id="search-icon">⌕</span>
       <input id="search" placeholder="Cerca..." oninput="doSearch(this.value)">
@@ -821,6 +850,11 @@ const I18N={
   // Other
   "item":{it:"Oggetto...",en:"Item..."},
   "copied":{it:"Copiato!",en:"Copied!"},
+  // Info box (top-right)
+  "infoValuesTitle":{it:"Sui valori",en:"About the values"},
+  "infoValuesText":{it:"I valori mostrati non sono in KAN reali. Sono unit\u00e0 relative basate sul fatto che uno Shikai RR = 1k valore. Quindi ad esempio un Dullahan Vial a 800k di valore NON equivale a 800k KAN reali.",en:"The values shown are not actual KAN. They are relative units based on a Shikai RR = 1k value. So for example a Dullahan Vial being 800k value is NOT actually 800k KAN."},
+  "infoSourceTitle":{it:"Fonte dei valori",en:"Values source"},
+  "infoSourceText":{it:"I valori provengono dalla \u201cTrade Hub Value List\u201d fornita da discord.gg/thetradehub. Vai a dare un'occhiata al loro lavoro \u2014 senza la loro lista, questo strumento non sarebbe possibile.",en:"Values are provided by the \u201cTrade Hub Value List\u201d from discord.gg/thetradehub. Go check them out \u2014 this work wouldn't be possible without their list."},
 };
 
 function t(key){return I18N[key]?I18N[key][LANG]||I18N[key].it:key;}
@@ -883,6 +917,11 @@ function applyLang(){
       else{el.appendChild(label);}
     }
     label.textContent=menuTexts[i];
+  });
+  // Info box (top-right): translate all data-i18n attributes inside the popover
+  document.querySelectorAll('#info-box-popover [data-i18n]').forEach(el=>{
+    const key=el.getAttribute('data-i18n');
+    if(key)el.textContent=t(key);
   });
   // Settings modal
   const settingsH3=document.querySelector('#settings-header h3');
@@ -2199,6 +2238,31 @@ function toggleMainMenu(btn){
 function closeAllMenus(){
   document.querySelectorAll('.topbar-group.open').forEach(g=>g.classList.remove('open'));
 }
+
+/* ===== INFO BOX (top-right popover) =====
+   Click on the ℹ button toggles a small popover with two info sections:
+   - "About the values" disclaimer (values aren't actual KAN, relative units)
+   - "Values source" attribution (Trade Hub Value List, discord.gg/thetradehub)
+   Click outside closes it. */
+function toggleInfoBox(btn){
+  const popover=document.getElementById('info-box-popover');
+  if(!popover)return;
+  const isOpen=popover.classList.contains('show');
+  closeAllMenus(); // also closes any open dropdown
+  if(!isOpen){
+    popover.classList.add('show');
+    btn.classList.add('active');
+  } else {
+    popover.classList.remove('show');
+    btn.classList.remove('active');
+  }
+}
+function closeInfoBox(){
+  const popover=document.getElementById('info-box-popover');
+  if(popover)popover.classList.remove('show');
+  const btn=document.getElementById('info-box-btn');
+  if(btn)btn.classList.remove('active');
+}
 function toggleQuickAddRow(){
   const row2=document.getElementById('topbar-row2');
   const qa=document.getElementById('quick-add-wrap');
@@ -2228,6 +2292,8 @@ function refreshRow2(){
 }
 document.addEventListener('click',e=>{
   if(!e.target.closest('.topbar-group')) closeAllMenus();
+  // Close info box when clicking outside it
+  if(!e.target.closest('#info-box-wrap')) closeInfoBox();
 });
 
 function resetLayout(){localStorage.removeItem(LKEY);renderAll();}
