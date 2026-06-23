@@ -694,11 +694,11 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
         <input id="quick-add-input" placeholder="Nome oggetto..." type="text" autocomplete="off">
       </div>
       <div class="stepper" id="quick-add-stepper">
-        <button class="step-btn" onclick="stepQty('quick-add-qty',-1)">−</button>
+        <button class="step-btn" onmousedown="event.preventDefault();stepQty('quick-add-qty',-1)">−</button>
         <input class="step-input" id="quick-add-qty" type="number" min="1" value="1" title="Quantità">
-        <button class="step-btn" onclick="stepQty('quick-add-qty',1)">+</button>
+        <button class="step-btn" onmousedown="event.preventDefault();stepQty('quick-add-qty',1)">+</button>
       </div>
-      <button class="quick-add-btn" onclick="quickAddItem()">Aggiungi</button>
+      <button class="quick-add-btn" onmousedown="event.preventDefault();quickAddItem()">Aggiungi</button>
     </div>
   </div>
 </div>
@@ -2985,7 +2985,7 @@ function buildTradeCalcWin(){
   body.style.cssText='display:flex;flex-direction:column;padding:0;overflow:hidden;';
   const tcBody=document.createElement('div');
   tcBody.className='tc-body';tcBody.id='tc-body';
-  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0 KAN</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-give-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" value="0" oninput="tcSetKan('give',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0 KAN</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-receive-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" value="0" oninput="tcSetKan('receive',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
+  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0 KAN</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-give-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" onfocus="this.select()" oninput="tcSetKan('give',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0 KAN</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-receive-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" onfocus="this.select()" oninput="tcSetKan('receive',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
   body.appendChild(tcBody);
   const result=document.createElement('div');
   result.className='tc-result';result.id='tc-result';
@@ -3061,11 +3061,12 @@ function makeTcResizable(win,handle){
 
 function clearTradeCalc(){
   tcData={give:[],receive:[],giveKan:0,receiveKan:0};
-  // Reset KAN input fields too
+  // Reset KAN input fields too — leave them empty so the placeholder "0" shows
+  // instead of a real "0" that would cause a leading-zero bug when typing.
   const gk=document.getElementById('tc-give-kan');
-  if(gk)gk.value='0';
+  if(gk)gk.value='';
   const rk=document.getElementById('tc-receive-kan');
-  if(rk)rk.value='0';
+  if(rk)rk.value='';
   tcRenderSide('give');tcRenderSide('receive');tcUpdateResult();
 }
 
@@ -3390,6 +3391,41 @@ function qaNavigate(e){
   const ac=document.getElementById('quick-add-ac');
   const items=ac.querySelectorAll('.qa-ac-item');
   if(!items.length)return;
+
+  // Tab / Shift+Tab: navigate the dropdown AND live-autocomplete the highlighted
+  // item into the input. The dropdown stays open so the user can keep Tabbing.
+  // Enter (or the Aggiungi button) is what actually adds the item.
+  if(e.key==='Tab' && ac.classList.contains('show')){
+    e.preventDefault();
+    items.forEach(i=>i.classList.remove('qa-ac-active'));
+    if(e.shiftKey){
+      qaAcIdx = qaAcIdx <= 0 ? items.length - 1 : qaAcIdx - 1;
+    } else {
+      qaAcIdx = qaAcIdx >= items.length - 1 ? 0 : qaAcIdx + 1;
+    }
+    items[qaAcIdx].classList.add('qa-ac-active');
+    items[qaAcIdx].scrollIntoView({block:'nearest'});
+    // Live autocomplete: fill the input with the highlighted item's canonical name
+    document.getElementById('quick-add-input').value =
+      items[qaAcIdx].querySelector('.qa-ac-name').textContent;
+    return;
+  }
+
+  // Enter: ALWAYS add the item. If an item is currently highlighted (via Arrow
+  // keys or Tab), fill the input with its name first, then call quickAddItem().
+  // This makes the flow: type → Tab to autocomplete → Enter to add (one press).
+  if(e.key==='Enter'){
+    e.preventDefault();
+    if(qaAcIdx >= 0 && items[qaAcIdx]){
+      document.getElementById('quick-add-input').value =
+        items[qaAcIdx].querySelector('.qa-ac-name').textContent;
+    }
+    ac.classList.remove('show');
+    qaAcIdx=-1;
+    quickAddItem();
+    return;
+  }
+
   if(e.key==='ArrowDown'){
     e.preventDefault();
     items.forEach(i=>i.classList.remove('qa-ac-active'));
@@ -3402,10 +3438,6 @@ function qaNavigate(e){
     qaAcIdx=Math.max(qaAcIdx-1,0);
     items[qaAcIdx].classList.add('qa-ac-active');
     items[qaAcIdx].scrollIntoView({block:'nearest'});
-  }else if(e.key==='Enter'&&qaAcIdx>=0){
-    e.preventDefault();
-    document.getElementById('quick-add-input').value=items[qaAcIdx].querySelector('.qa-ac-name').textContent;
-    ac.classList.remove('show');qaAcIdx=-1;
   }else if(e.key==='Escape'){
     ac.classList.remove('show');qaAcIdx=-1;
   }
@@ -3416,10 +3448,10 @@ function qaNavigate(e){
   const input=document.getElementById('quick-add-input');
   const ac=document.getElementById('quick-add-ac');
   input.addEventListener('input',()=>qaShowAc(input.value.trim()));
-  input.addEventListener('keydown',e=>{
-    qaNavigate(e);
-    if(e.key==='Enter'&&qaAcIdx<0){e.preventDefault();quickAddItem();}
-  });
+  // All key handling (Tab navigation, Enter to add, Arrow keys, Escape) is done
+  // inside qaNavigate — no duplicate Enter handler here, otherwise quickAddItem
+  // would be called twice when Enter is pressed.
+  input.addEventListener('keydown',qaNavigate);
   input.addEventListener('blur',()=>setTimeout(()=>ac.classList.remove('show'),150));
   document.getElementById('quick-add-qty').addEventListener('keydown',e=>{
     if(e.key==='Enter'){e.preventDefault();quickAddItem();}
