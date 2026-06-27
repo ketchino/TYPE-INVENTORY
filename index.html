@@ -182,6 +182,18 @@ body.vpanel-open #canvas{margin-right:var(--panel-w);}
 .menu-dropdown .md-item:hover .md-icon{color:var(--red);}
 .menu-dropdown .md-label{color:inherit;}
 
+/* ===== SUBMENU (Copia Discord → Copia Colori / Copia Testo) =====
+   Uses JS debouncing instead of pure CSS :hover because hover-based dropdowns
+   are too sensitive — even a 1ms mouseout closes the submenu. With a 300ms
+   delay, the user can move the mouse across gaps without losing the submenu. */
+.md-submenu-trigger{position:relative;}
+.md-submenu-arrow{margin-left:auto;color:var(--dim);font-size:10px;flex-shrink:0;}
+.md-submenu-trigger:hover .md-submenu-arrow{color:var(--red);}
+.md-submenu{display:none;position:absolute;left:100%;top:0;min-width:160px;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:4px 0;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:2002;margin-left:0;}
+.md-submenu.show{display:block;}
+.md-submenu .md-item{padding:5px 12px;}
+.md-submenu .md-item:hover{background:var(--red-glow);color:var(--red);}
+
 /* total value */
 #total-value{font-size:13px;font-weight:700;color:#f1c40f;letter-spacing:.05em;margin-left:8px;padding:4px 10px;background:rgba(241,196,15,0.12);border:1px solid rgba(241,196,15,0.25);border-radius:5px;white-space:nowrap;text-shadow:0 0 8px rgba(241,196,15,0.3);transition:all .15s ease;cursor:default;}
 #total-value:hover{border-color:var(--theme-accent);background:rgba(241,196,15,0.18);box-shadow:0 0 8px rgba(241,196,15,0.2);}
@@ -285,6 +297,12 @@ body.vpanel-open #bottombar{right:var(--panel-w);}
 .item-row .btn-minus{margin-left:auto;}
 .item-row .qty{background:rgba(255,255,255,.02);border-radius:8px;padding:1px 5px;}
 .item-row.search-hide{display:none;}
+/* Drag-and-drop feedback */
+.item-row[draggable="true"]{cursor:grab;}
+.item-row[draggable="true"]:active{cursor:grabbing;}
+.item-row.dragging{opacity:.4;}
+.item-row.drag-over{border-top:2px solid var(--theme-accent);margin-top:-1px;padding-top:3px;}
+.win-body.drag-target{background:var(--red-glow);}
 .item-row.search-match .item-name{color:#fff;}
 .item-name{flex:1;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-icon{font-size:11px;flex-shrink:0;width:16px;text-align:center;opacity:.7;line-height:1;}
@@ -624,7 +642,7 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
 <!-- Value Panel (RIGHT SIDE) -->
 <div id="vpanel" class="closed">
   <div id="vpanel-header">
-    <h2>Trade Values (KAN)</h2>
+    <h2>Trade Values</h2>
     <div id="vpanel-search-wrap">
       <span id="vpanel-search-icon">⌕</span>
       <input id="vpanel-search" placeholder="Cerca valore..." oninput="filterValuePanel(this.value)">
@@ -652,7 +670,13 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
         <div class="md-item" onclick="closeAllMenus();exportTxt()"><span class="md-icon">📤</span>Esporta TXT</div>
         <div class="md-item" onclick="closeAllMenus();importTxt()"><span class="md-icon">📥</span>Importa TXT</div>
         <div class="md-sep"></div>
-        <div class="md-item" onclick="event.stopPropagation();copyDiscord(this)"><span class="md-icon">📋</span>Copia Discord</div>
+        <div class="md-item md-submenu-trigger">
+          <span class="md-icon">📋</span><span class="md-label" data-i18n="copyDiscord">Copia Discord</span><span class="md-submenu-arrow">▸</span>
+          <div class="md-submenu">
+            <div class="md-item md-submenu-item" onclick="closeAllMenus();copyDiscordColors(this)"><span class="md-icon">🎨</span><span class="md-label" data-i18n="copyColors">Copia Colori</span></div>
+            <div class="md-item md-submenu-item" onclick="closeAllMenus();copyDiscordText(this)"><span class="md-icon">📝</span><span class="md-label" data-i18n="copyText">Copia Testo</span></div>
+          </div>
+        </div>
         <div class="md-item" onclick="closeAllMenus();syncSheetValues(true)"><span class="md-icon">🔄</span>Aggiorna valori</div>
         <div class="md-item" onclick="closeAllMenus();openHistory()"><span class="md-icon">📜</span>Storico Trade</div>
         <div class="md-item" onclick="closeAllMenus();resetLayout()"><span class="md-icon">↺</span>Reset layout</div>
@@ -694,11 +718,11 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
         <input id="quick-add-input" placeholder="Nome oggetto..." type="text" autocomplete="off">
       </div>
       <div class="stepper" id="quick-add-stepper">
-        <button class="step-btn" onmousedown="event.preventDefault();stepQty('quick-add-qty',-1)">−</button>
+        <button class="step-btn" onclick="stepQty('quick-add-qty',-1)">−</button>
         <input class="step-input" id="quick-add-qty" type="number" min="1" value="1" title="Quantità">
-        <button class="step-btn" onmousedown="event.preventDefault();stepQty('quick-add-qty',1)">+</button>
+        <button class="step-btn" onclick="stepQty('quick-add-qty',1)">+</button>
       </div>
-      <button class="quick-add-btn" onmousedown="event.preventDefault();quickAddItem()">Aggiungi</button>
+      <button class="quick-add-btn" onclick="quickAddItem()">Aggiungi</button>
     </div>
   </div>
 </div>
@@ -785,7 +809,7 @@ const I18N={
   "tradingCalc":{it:"TRADING CALC",en:"TRADING CALC"},
   "lookingFor":{it:"LOOKING FOR",en:"LOOKING FOR"},
   // Value panel
-  "tradeValues":{it:"Valori Trade (KAN)",en:"Trade Values (KAN)"},
+  "tradeValues":{it:"Valori Trade",en:"Trade Values"},
   "searchValue":{it:"Cerca valore...",en:"Search value..."},
   // Search
   "search":{it:"Cerca nell'inventario",en:"Search in Inventory"},
@@ -802,6 +826,8 @@ const I18N={
   "exportTxt":{it:"Esporta TXT",en:"Export TXT"},
   "importTxt":{it:"Importa TXT",en:"Import TXT"},
   "copyDiscord":{it:"Copia Discord",en:"Copy Discord"},
+  "copyColors":{it:"Copia Colori",en:"Copy Colors"},
+  "copyText":{it:"Copia Testo",en:"Copy Text"},
   "syncValues":{it:"Aggiorna valori",en:"Sync values"},
   "valuesSynced":{it:"Valori aggiornati dal Google Sheet!",en:"Values updated from Google Sheet!"},
   "valuesSyncFailed":{it:"Impossibile contattare il Google Sheet, uso gli ultimi valori noti",en:"Couldn't reach the Google Sheet, using last known values"},
@@ -956,8 +982,9 @@ function applyLang(){
   // every time applyLang ran. That occasionally dropped emoji glyphs (race
   // conditions during font loading, or .md-icon not being present yet on a
   // re-entry). Updating only the text node is safer and preserves the icon.
-  const mdItems=document.querySelectorAll('.md-item');
-  const menuTexts=[t('hideShowValues'),t('hideShowControls'),t('quickAddMenu'),t('exportTxt'),t('importTxt'),t('copyDiscord'),t('syncValues'),t('tradeHistory'),t('resetLayout'),t('settings')];
+  // Exclude .md-submenu-trigger and .md-submenu-item (handled via data-i18n below).
+  const mdItems=document.querySelectorAll('.menu-dropdown > .md-item:not(.md-submenu-trigger)');
+  const menuTexts=[t('hideShowValues'),t('hideShowControls'),t('quickAddMenu'),t('exportTxt'),t('importTxt'),t('syncValues'),t('tradeHistory'),t('resetLayout'),t('settings')];
   mdItems.forEach((el,i)=>{
     if(!menuTexts[i])return;
     // Find or create a text node container after the .md-icon
@@ -979,6 +1006,11 @@ function applyLang(){
   });
   // Info box (top-right): translate all data-i18n attributes inside the popover
   document.querySelectorAll('#info-box-popover [data-i18n]').forEach(el=>{
+    const key=el.getAttribute('data-i18n');
+    if(key)el.textContent=t(key);
+  });
+  // Submenu (Copia Discord → Copia Colori / Copia Testo): translate data-i18n
+  document.querySelectorAll('.md-submenu [data-i18n], .md-submenu-trigger [data-i18n]').forEach(el=>{
     const key=el.getAttribute('data-i18n');
     if(key)el.textContent=t(key);
   });
@@ -1038,11 +1070,30 @@ function applyLang(){
 /* ===== TRADE VALUE LIST (in Shikai Rerolls) ===== */
 /* Updated June 2026 — used as fallback if the Google Sheet can't be reached */
 let TRADE_VALUES={};
-/* ===== TRADE VALUES =====
-   Loaded at startup from the Google Sheet (or from localStorage cache if
-   the sheet is unreachable). No hardcoded fallback list anymore — the
-   sheet is the single source of truth. While loading, the value panel
-   shows a placeholder and getTradeValue() returns 0. */
+
+/* ===== KNOWN ITEMS FALLBACK =====
+   Items that exist in the game but are NOT yet in the Google Sheet value list.
+   They appear in autocomplete with value null (shown as "--") so users can still
+   add them to their inventory. When the sheet adds them, the real value
+   overwrites this fallback automatically. Keep in sync with SPECIFIC_SECTIONS
+   for correct categorization. */
+const KNOWN_ITEMS={
+  // Elixirs
+  "Blue Elixir":null,
+  // Consumables (colored character-themed items)
+  "Abarai Red":null,"Grimmjow Blue":null,"Ishida White":null,"Jugram Yellow":null,
+  "Nelliel Green":null,"Shihouin Purple":null,"Yachiru Pink":null,
+  "Purifier":null,"Large Bait":null,
+  // Rerolls (new reroll types not yet in the sheet)
+  "Eyebrows RRs":null,"Hair Shade RRs":null,"Hilt/Handle RRs":null,
+  "Innerworld RRs":null,"Mouth RRs":null,"Resurreccion Callout RRs":null,
+  "Shikai Callout RRs":null,"Vizard Mask RRs":null,"Vollstandig Name RRs":null,
+  "Weapon Appearence RRs":null,"Weapon RRs":null,
+  "Legendary Element RRs":null,"Mythical Element RRs":null,
+  // Cosmetics
+  "Hikone's Kimono":null,"Ikomikidomoe's Crest":null,"Ikomikidomoe's Horns":null,
+  "Min Starrk Mask":null,"Tiger King's Pants":null,"White Kirishima Horns":null,
+};
 
 /* ===== ALIASES (old/variant names -> canonical names) =====
    Only getTradeValue() consults this map. It is NEVER iterated to build
@@ -1053,6 +1104,11 @@ const TRADE_ALIASES={
   "Normal Black Elixir":"Black Elixir",
   "Fire Knight's Ember":"Small Fire Knight's Ember",
   "Gran Raikoho":"Gran Raikoho Essence",
+  // "Element Reroll" is a separate item that has the same function as the
+  // universal Shikai/Volt/Res Reroll — same price. Map it so the value lookup works.
+  "Element Reroll":"Shikai/Volt/Res RRs",
+  "Element RR":"Shikai/Volt/Res RRs",
+  "Element RRs":"Shikai/Volt/Res RRs",
 };
 
 /* ===== TRADE RENAMES =====
@@ -1102,9 +1158,11 @@ let AC_ITEMS=[];
 function rebuildAcItems(){
   const seen=new Set();
   const items=[];
-  Object.entries(TRADE_VALUES).sort((a,b)=>b[1]-a[1]).forEach(([name,val])=>{
+  // Sort by value desc; treat null (unpriced known items) as 0 so they
+  // appear at the bottom of the autocomplete list.
+  Object.entries(TRADE_VALUES).sort((a,b)=>(b[1]||0)-(a[1]||0)).forEach(([name,val])=>{
     const key=name.toLowerCase();
-    if(!seen.has(key)){seen.add(key);items.push({name,val});}
+    if(!seen.has(key)){seen.add(key);items.push({name,val:val===null?0:val});}
   });
   AC_ITEMS=items;
 }
@@ -1224,6 +1282,9 @@ function expandObtLabel(raw){
    values in the background and overwrite the cache when it completes. */
 (function loadCachedValuesSync(){
   try{
+    // First, merge KNOWN_ITEMS (value 0) so they appear in autocomplete.
+    // Cache and sheet values will overwrite these if they have the item.
+    TRADE_VALUES=Object.assign({},TRADE_VALUES,KNOWN_ITEMS);
     const cachedVals=localStorage.getItem(REMOTE_VALUES_CACHE_KEY);
     const cachedObt=localStorage.getItem(REMOTE_SOURCES_CACHE_KEY);
     const cachedLegend=localStorage.getItem(REMOTE_LEGEND_CACHE_KEY);
@@ -1520,22 +1581,29 @@ function refreshAfterValuesUpdate(){
 
 function getTradeValue(name){
   if(!name) return 0;
-  if(TRADE_VALUES[name]!==undefined) return TRADE_VALUES[name];
+  if(TRADE_VALUES[name]!==undefined){
+    // null means "known item but not yet priced" — treat as 0 (shown as "--")
+    return TRADE_VALUES[name]===null?0:TRADE_VALUES[name];
+  }
   // Resolve old/variant names via the alias table
   const canonical=TRADE_ALIASES[name];
-  if(canonical && TRADE_VALUES[canonical]!==undefined) return TRADE_VALUES[canonical];
+  if(canonical && TRADE_VALUES[canonical]!==undefined){
+    return TRADE_VALUES[canonical]===null?0:TRADE_VALUES[canonical];
+  }
   const lower=name.toLowerCase().trim();
   // Also try case-insensitive alias lookup
   for(const[alias,target] of Object.entries(TRADE_ALIASES)){
-    if(alias.toLowerCase().trim()===lower && TRADE_VALUES[target]!==undefined) return TRADE_VALUES[target];
+    if(alias.toLowerCase().trim()===lower && TRADE_VALUES[target]!==undefined){
+      return TRADE_VALUES[target]===null?0:TRADE_VALUES[target];
+    }
   }
   for(const[k,v] of Object.entries(TRADE_VALUES)){
-    if(k.toLowerCase().trim()===lower) return v;
+    if(k.toLowerCase().trim()===lower) return v===null?0:v;
   }
   // Normalized whitespace match
   const norm=lower.replace(/\s+/g,' ');
   for(const[k,v] of Object.entries(TRADE_VALUES)){
-    if(k.toLowerCase().trim().replace(/\s+/g,' ')===norm) return v;
+    if(k.toLowerCase().trim().replace(/\s+/g,' ')===norm) return v===null?0:v;
   }
   return 0;
 }
@@ -1551,6 +1619,8 @@ function validateTradeValues(){
       issues.push({type:'DUPLICATE',detail:'"'+name+'" \u2248 "'+seen.get(key)+'"'});
     } else { seen.set(key,name); }
     const val=TRADE_VALUES[name];
+    // null means "known item, not yet priced" — that's fine, not a BAD_VALUE.
+    if(val===null)continue;
     if(typeof val!=='number'||val<=0){ issues.push({type:'BAD_VALUE',detail:'"'+name+'" = '+val}); }
     if(val>2000000){ issues.push({type:'SUSPICIOUS',detail:'"'+name+'" = '+val.toLocaleString()}); }
   }
@@ -1631,12 +1701,15 @@ function buildValuePanel(){
     list.appendChild(loader);
     return;
   }
-  const sorted=Object.entries(TRADE_VALUES).sort((a,b)=>b[1]-a[1]);
+  // Sort by value desc; treat null (unpriced known items) as 0 so they
+  // appear at the bottom of the value panel.
+  const sorted=Object.entries(TRADE_VALUES).sort((a,b)=>(b[1]||0)-(a[1]||0));
   const shown=new Set();
   VALUE_CATEGORIES.forEach(cat=>{
     const catItems=sorted.filter(([name,val])=>{
       if(shown.has(name.toLowerCase())) return false;
-      const inRange=val>=cat.min&&(cat.max===undefined||val<=cat.max);
+      const v=val===null?0:val;
+      const inRange=v>=cat.min&&(cat.max===undefined||v<=cat.max);
       return inRange;
     });
     if(!catItems.length) return;
@@ -1650,12 +1723,14 @@ function buildValuePanel(){
     countEl.textContent=catItems.length+' items';
     list.appendChild(countEl);
     catItems.forEach(([name,val])=>{
+      const v=val===null?0:val;
+      const valText=v>0?formatValue(v):'--';
       const row=document.createElement('div');
       row.className='vp-row';
       row.dataset.name=name.toLowerCase();
       const obt=getItemSource(name);
       const obtHtml=obt?`<span class="vp-obt" data-obt-raw="${escHtml(obt)}">${escHtml(obt)}</span>`:'';
-      row.innerHTML=`<span class="vp-name" title="${escHtml(name)}">${escHtml(name)}</span>${obtHtml}<span class="vp-val ${valueTier(val)}">${formatValue(val)}</span>`;
+      row.innerHTML=`<span class="vp-name" title="${escHtml(name)}">${escHtml(name)}</span>${obtHtml}<span class="vp-val ${valueTier(v)}">${valText}</span>`;
       list.appendChild(row);
     });
   });
@@ -1986,6 +2061,11 @@ function buildWinBody(sec,items){
       const isDupe=dupeNames.has(item.name.toLowerCase());
       const row=document.createElement('div');
       row.className='item-row'+(tierClass?' '+tierClass:'')+(isDupe?' dupe':'');
+      // Drag-and-drop: each row is draggable. data-sec and data-idx identify
+      // the source item so the drop handler can move it to another section.
+      row.draggable=true;
+      row.dataset.sec=sec;
+      row.dataset.idx=idx;
       const secIcon=SECTION_ICONS[sec]||'';
       row.innerHTML=`
         <span class="item-icon ${secClass(sec)}">${secIcon}</span><span class="item-name" title="${escHtml(item.name)}">${escHtml(item.name)}</span>
@@ -2013,12 +2093,94 @@ function buildWinBody(sec,items){
         d[sec].splice(idx,1);saveData(d);refreshWin(sec);
         toast(`"${name}" ${t('deleted')}`);
       };
+      // Drag-and-drop handlers
+      row.addEventListener('dragstart',e=>{
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed='move';
+        e.dataTransfer.setData('text/plain',JSON.stringify({sec,idx}));
+      });
+      row.addEventListener('dragend',()=>{
+        row.classList.remove('dragging');
+        document.querySelectorAll('.item-row.drag-over').forEach(r=>r.classList.remove('drag-over'));
+        document.querySelectorAll('.win-body.drag-target').forEach(b=>b.classList.remove('drag-target'));
+      });
+      row.addEventListener('dragover',e=>{
+        e.preventDefault();
+        e.dataTransfer.dropEffect='move';
+        if(!row.classList.contains('dragging')){
+          row.classList.add('drag-over');
+        }
+      });
+      row.addEventListener('dragleave',()=>{
+        row.classList.remove('drag-over');
+      });
+      row.addEventListener('drop',e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        row.classList.remove('drag-over');
+        try{
+          const src=JSON.parse(e.dataTransfer.getData('text/plain'));
+          if(src.sec===sec&&src.idx===idx)return; // same item
+          moveItem(src.sec,src.idx,sec);
+        }catch{}
+      });
       body.appendChild(row);
     });
   }
+  // Allow drop on the body itself (for empty sections or dropping at the end)
+  body.addEventListener('dragover',e=>{
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    body.classList.add('drag-target');
+  });
+  body.addEventListener('dragleave',e=>{
+    // Only remove highlight if leaving the body entirely
+    if(!body.contains(e.relatedTarget))body.classList.remove('drag-target');
+  });
+  body.addEventListener('drop',e=>{
+    e.preventDefault();
+    body.classList.remove('drag-target');
+    // If the drop target was a row, the row's drop handler already handled it
+    // (with stopPropagation). If we get here, the drop was on the body itself
+    // (empty area or end of list) — move the item to this section.
+    if(e.target.closest('.item-row'))return;
+    try{
+      const src=JSON.parse(e.dataTransfer.getData('text/plain'));
+      moveItem(src.sec,src.idx,sec);
+    }catch{}
+  });
   const q=document.getElementById('search').value.trim().toLowerCase();
   if(q)doSearch(q);
   return body;
+}
+
+/* Moves an item from one section to another. srcSec/srcIdx identify the
+   source item; destSec is the target section. The item is appended to the
+   end of the destination section. Data is saved and both windows refreshed. */
+function moveItem(srcSec,srcIdx,destSec){
+  if(srcSec===destSec)return; // same section, nothing to do
+  pushUndo();
+  const d=loadData();
+  if(!d[srcSec]||!d[srcSec][srcIdx])return;
+  if(!d[destSec])d[destSec]=[];
+  const item=d[srcSec][srcIdx];
+  // Check if the item already exists in the destination (by name, case-insensitive).
+  // If so, merge by summing quantities instead of creating a duplicate.
+  const existing=d[destSec].find(i=>i.name.toLowerCase()===item.name.toLowerCase());
+  if(existing){
+    existing.qty+=item.qty;
+    d[srcSec].splice(srcIdx,1);
+    toast(`"${item.name}" ${t('updatedIn')} ${destSec}`);
+  } else {
+    d[destSec].push(item);
+    d[srcSec].splice(srcIdx,1);
+    toast(`"${item.name}" ${t('addedIn')} ${destSec}`);
+  }
+  saveData(d);
+  refreshWin(srcSec);
+  refreshWin(destSec);
+  updateAllPcts();
+  updateTotalDisplay();
 }
 
 function updateAllPcts(){
@@ -2030,7 +2192,7 @@ function updateAllPcts(){
     const pctEl=win.querySelector('.win-pct');
     if(!pctEl)return;
     const secVal=calcSectionValue(data[sec]||[]);
-    const pct=totalVal>0?Math.round(secVal/totalVal*100):0;
+    const pct=totalVal>0?(secVal/totalVal*100).toFixed(2):'0.00';
     pctEl.textContent=pct+'%';
   });
 }
@@ -2086,7 +2248,7 @@ function renderAll(){
       h: saved.h!==undefined ? saved.h : def.h,
     };
     const secVal=calcSectionValue(items);
-    const pct=totalVal>0?Math.round(secVal/totalVal*100):0;
+    const pct=totalVal>0?(secVal/totalVal*100).toFixed(2):'0.00';
     const collapsed=(loadSettings().collapsed||[]).includes(sec);
 
     const win=document.createElement('div');
@@ -2301,7 +2463,49 @@ function toggleMainMenu(btn){
 }
 function closeAllMenus(){
   document.querySelectorAll('.topbar-group.open').forEach(g=>g.classList.remove('open'));
+  // Also close any open submenu
+  document.querySelectorAll('.md-submenu.show').forEach(s=>s.classList.remove('show'));
 }
+
+/* ===== SUBMENU hover with debouncing =====
+   Opens the submenu on mouseenter, closes on mouseleave with a 300ms delay.
+   If the user re-enters the trigger or submenu within 300ms, the close is
+   cancelled. This prevents the submenu from disappearing when the mouse
+   briefly exits during normal movement. */
+(function setupSubmenuHover(){
+  let submenuCloseTimer=null;
+  function clearCloseTimer(){
+    if(submenuCloseTimer){clearTimeout(submenuCloseTimer);submenuCloseTimer=null;}
+  }
+  function openSubmenu(trigger){
+    clearCloseTimer();
+    const submenu=trigger.querySelector('.md-submenu');
+    if(submenu)submenu.classList.add('show');
+  }
+  function scheduleCloseSubmenu(){
+    clearCloseTimer();
+    submenuCloseTimer=setTimeout(()=>{
+      document.querySelectorAll('.md-submenu.show').forEach(s=>s.classList.remove('show'));
+    },300);
+  }
+  document.addEventListener('mouseover',e=>{
+    const trigger=e.target.closest('.md-submenu-trigger');
+    if(trigger){openSubmenu(trigger);return;}
+    const subItem=e.target.closest('.md-submenu');
+    if(subItem){clearCloseTimer();return;}
+  });
+  document.addEventListener('mouseout',e=>{
+    const trigger=e.target.closest('.md-submenu-trigger');
+    const subItem=e.target.closest('.md-submenu');
+    if(trigger||subItem){
+      const goingTo=e.relatedTarget;
+      if(goingTo&&goingTo.closest&&(goingTo.closest('.md-submenu-trigger')||goingTo.closest('.md-submenu'))){
+        return;
+      }
+      scheduleCloseSubmenu();
+    }
+  });
+})();
 
 /* ===== INFO BOX (top-right popover) =====
    Click on the ℹ button toggles a small popover with two info sections:
@@ -2614,17 +2818,17 @@ const SETTINGS_KEY='bleach_settings_v1';
 const THEME_KEY='bleach_theme_v1';
 const CUSTOM_THEME_KEY='bleach_custom_themes_v2';
 const THEMES={
-  "shinigami":{name:"Shinigami",desc:"Nero & Rosso",accent:"#c0392b",bg:"#0d0d0d",bg3:"#1a1a1a",border:"#2a2a2a",text:"#e0e0e0",swatches:["#0d0d0d","#1a1a1a","#c0392b","#7a1f16"]},
-  "hueco-mundo":{name:"Hueco Mundo",desc:"Blu & Ciano",accent:"#00bcd4",bg:"#080d14",bg3:"#121a2e",border:"#1a2540",text:"#c8dce8",swatches:["#080d14","#121a2e","#00bcd4","#006978"]},
-  "quincy":{name:"Quincy",desc:"Viola & Bianco",accent:"#9c27b0",bg:"#0e0a14",bg3:"#1c1530",border:"#2e1f4a",text:"#d8c8e8",swatches:["#0e0a14","#1c1530","#9c27b0","#6a1b9a"]},
-  "aizen":{name:"Aizen",desc:"Oro & Ombra",accent:"#d4a843",bg:"#0a0a0a",bg3:"#1a1a1a",border:"#2a2520",text:"#e8dcc8",swatches:["#0a0a0a","#1a1a1a","#d4a843","#8a6d24"]},
-  "hollow":{name:"Hollow",desc:"Rosso Sangue",accent:"#e74c3c",bg:"#0f0808",bg3:"#261414",border:"#3d1f1f",text:"#f0d0d0",swatches:["#0f0808","#261414","#e74c3c","#a93226"]},
-  "soul-king":{name:"Soul King",desc:"Oro Reale",accent:"#ffd700",bg:"#0a0808",bg3:"#1e1818",border:"#302020",text:"#f5e6cc",swatches:["#0a0808","#1e1818","#ffd700","#c9a96e"]},
-  "kurotsuchi":{name:"Kurotsuchi",desc:"Verde Veleno",accent:"#4caf50",bg:"#060a06",bg3:"#142014",border:"#1a3a1a",text:"#c8e8c8",swatches:["#060a06","#142014","#4caf50","#2e7d32"]},
-  "yamamoto":{name:"Yamamoto",desc:"Fuoco & Braci",accent:"#ff6600",bg:"#0d0804",bg3:"#2a1a0e",border:"#3d2814",text:"#f0dcc8",swatches:["#0d0804","#2a1a0e","#ff6600","#cc5200"]},
-  "ulquiorra":{name:"Ulquiorra",desc:"Blu Disperazione",accent:"#5c6bc0",bg:"#04060a",bg3:"#101828",border:"#1a2440",text:"#c8d0e8",swatches:["#04060a","#101828","#5c6bc0","#3949ab"]},
-  "szayelaporro":{name:"Szayelaporro",desc:"Rosa Maligno",accent:"#e91e90",bg:"#0d060a",bg3:"#22101e",border:"#3a1a34",text:"#f0c8e0",swatches:["#0d060a","#22101e","#e91e90","#ad1457"]},
-  "starrk":{name:"Starrk",desc:"Turchese Solitario",accent:"#26a69a",bg:"#060808",bg3:"#121c1c",border:"#1a3030",text:"#c8e8e0",swatches:["#060808","#121c1c","#26a69a","#00897b"]}
+  "shinigami":{name:"Shinigami",desc:{it:"Nero & Rosso",en:"Black & Red"},accent:"#c0392b",bg:"#0d0d0d",bg3:"#1a1a1a",border:"#2a2a2a",text:"#e0e0e0",swatches:["#0d0d0d","#1a1a1a","#c0392b","#7a1f16"]},
+  "hueco-mundo":{name:"Hueco Mundo",desc:{it:"Blu & Ciano",en:"Blue & Cyan"},accent:"#00bcd4",bg:"#080d14",bg3:"#121a2e",border:"#1a2540",text:"#c8dce8",swatches:["#080d14","#121a2e","#00bcd4","#006978"]},
+  "quincy":{name:"Quincy",desc:{it:"Viola & Bianco",en:"Purple & White"},accent:"#9c27b0",bg:"#0e0a14",bg3:"#1c1530",border:"#2e1f4a",text:"#d8c8e8",swatches:["#0e0a14","#1c1530","#9c27b0","#6a1b9a"]},
+  "aizen":{name:"Aizen",desc:{it:"Oro & Ombra",en:"Gold & Shadow"},accent:"#d4a843",bg:"#0a0a0a",bg3:"#1a1a1a",border:"#2a2520",text:"#e8dcc8",swatches:["#0a0a0a","#1a1a1a","#d4a843","#8a6d24"]},
+  "hollow":{name:"Hollow",desc:{it:"Rosso Sangue",en:"Blood Red"},accent:"#e74c3c",bg:"#0f0808",bg3:"#261414",border:"#3d1f1f",text:"#f0d0d0",swatches:["#0f0808","#261414","#e74c3c","#a93226"]},
+  "soul-king":{name:"Soul King",desc:{it:"Oro Reale",en:"Royal Gold"},accent:"#ffd700",bg:"#0a0808",bg3:"#1e1818",border:"#302020",text:"#f5e6cc",swatches:["#0a0808","#1e1818","#ffd700","#c9a96e"]},
+  "kurotsuchi":{name:"Kurotsuchi",desc:{it:"Verde Veleno",en:"Poison Green"},accent:"#4caf50",bg:"#060a06",bg3:"#142014",border:"#1a3a1a",text:"#c8e8c8",swatches:["#060a06","#142014","#4caf50","#2e7d32"]},
+  "yamamoto":{name:"Yamamoto",desc:{it:"Fuoco & Braci",en:"Fire & Embers"},accent:"#ff6600",bg:"#0d0804",bg3:"#2a1a0e",border:"#3d2814",text:"#f0dcc8",swatches:["#0d0804","#2a1a0e","#ff6600","#cc5200"]},
+  "ulquiorra":{name:"Ulquiorra",desc:{it:"Blu Disperazione",en:"Despair Blue"},accent:"#5c6bc0",bg:"#04060a",bg3:"#101828",border:"#1a2440",text:"#c8d0e8",swatches:["#04060a","#101828","#5c6bc0","#3949ab"]},
+  "szayelaporro":{name:"Szayelaporro",desc:{it:"Rosa Maligno",en:"Malicious Pink"},accent:"#e91e90",bg:"#0d060a",bg3:"#22101e",border:"#3a1a34",text:"#f0c8e0",swatches:["#0d060a","#22101e","#e91e90","#ad1457"]},
+  "starrk":{name:"Starrk",desc:{it:"Turchese Solitario",en:"Lone Teal"},accent:"#26a69a",bg:"#060808",bg3:"#121c1c",border:"#1a3030",text:"#c8e8e0",swatches:["#060808","#121c1c","#26a69a","#00897b"]}
 };
 
 function loadSettings(){
@@ -2808,14 +3012,67 @@ function buildDiscordMessageText(){
   return lines.join('\n');
 }
 
-function copyDiscord(btn){
+/* Builds a plain-text version of the inventory (no ANSI colors, no code block
+   markers). Used by "Copia Testo" for Discord servers that block ANSI-formatted
+   messages. Same structure as buildDiscordMessageText but stripped of formatting. */
+function buildDiscordPlainText(){
+  const data=loadData();
+  const lines=[];
+  SECTION_ORDER.forEach(sec=>{
+    if(HIDDEN_SECTIONS.includes(sec))return;
+    const items=data[sec];
+    if(!items||!items.length)return;
+    lines.push(sec+':');
+    [...items].sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
+    lines.push('');
+  });
+  Object.entries(data).forEach(([sec,items])=>{
+    if(SECTION_ORDER.includes(sec))return;
+    if(HIDDEN_SECTIONS.includes(sec))return;
+    if(!items.length)return;
+    lines.push(sec+':');
+    [...items].sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
+    lines.push('');
+  });
+  const wl=loadWishlist();
+  if(wl.length){
+    lines.push('LF:');
+    wl.forEach(i=>lines.push(i.qty+'x '+i.name));
+    lines.push('');
+  }
+  return lines.join('\n').trim();
+}
+
+/* Copy with ANSI colors (original behavior). For Discord servers that support
+   ```ansi code blocks. */
+function copyDiscordColors(btn){
   const text=buildDiscordMessageText();
   navigator.clipboard.writeText(text).then(()=>{
     toast(t('discordCopied'));
-    // Update only the label, NOT the icon — btn.textContent would erase
-    // the emoji. Same pattern as applyLang() for menu items.
     const label=btn.querySelector('.md-label');
-    const originalLabel=label?label.textContent:t('copyDiscord');
+    const originalLabel=label?label.textContent:t('copyColors');
+    if(label)label.textContent=t('copied');
+    else btn.textContent=t('copied');
+    setTimeout(()=>{
+      if(label)label.textContent=originalLabel;
+      else btn.textContent=originalLabel;
+    },2000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    toast(t('discordCopied'));
+  });
+}
+
+/* Copy as plain text (no ANSI colors, no code block markers). For Discord
+   servers that block ANSI-formatted messages. */
+function copyDiscordText(btn){
+  const text=buildDiscordPlainText();
+  navigator.clipboard.writeText(text).then(()=>{
+    toast(t('discordCopied'));
+    const label=btn.querySelector('.md-label');
+    const originalLabel=label?label.textContent:t('copyText');
     if(label)label.textContent=t('copied');
     else btn.textContent=t('copied');
     setTimeout(()=>{
@@ -2985,7 +3242,7 @@ function buildTradeCalcWin(){
   body.style.cssText='display:flex;flex-direction:column;padding:0;overflow:hidden;';
   const tcBody=document.createElement('div');
   tcBody.className='tc-body';tcBody.id='tc-body';
-  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0 KAN</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-give-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" onfocus="this.select()" oninput="tcSetKan('give',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0 KAN</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-receive-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" onfocus="this.select()" oninput="tcSetKan('receive',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
+  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0 KAN</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-give-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" value="0" oninput="tcSetKan('give',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0 KAN</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-receive-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" value="0" oninput="tcSetKan('receive',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
   body.appendChild(tcBody);
   const result=document.createElement('div');
   result.className='tc-result';result.id='tc-result';
@@ -3061,12 +3318,11 @@ function makeTcResizable(win,handle){
 
 function clearTradeCalc(){
   tcData={give:[],receive:[],giveKan:0,receiveKan:0};
-  // Reset KAN input fields too — leave them empty so the placeholder "0" shows
-  // instead of a real "0" that would cause a leading-zero bug when typing.
+  // Reset KAN input fields too
   const gk=document.getElementById('tc-give-kan');
-  if(gk)gk.value='';
+  if(gk)gk.value='0';
   const rk=document.getElementById('tc-receive-kan');
-  if(rk)rk.value='';
+  if(rk)rk.value='0';
   tcRenderSide('give');tcRenderSide('receive');tcUpdateResult();
 }
 
@@ -3208,7 +3464,7 @@ function tcUpdateResult(){
 }
 
 /* Guess section for new items */
-const BUDDY_NAMES=new Set(["paw","mono josh","vampire setro","greenanotherday","oasis","slimlua","licensed","dripmonger","hidden","quroven","setro","sayonarashigetora","kalin4444","armared","anben","kurt","thenotdave","minst_r","evilforge","sirin","nash","ielek","revxnant","keylocc","knobus","cosmic","khaotxc","erik","drakoooos","m1xm5","nrf_x","shirafune","verminnz","cartier361","ivorytemple","nano","steinmated","kingcowoe","nosrepp","data","thaiwonc","k1lluaa","jaleox","iphf","godkiri","captain 3","captain 7","androxius","dezstic","irazuka","rjeneration","avantiy","chassy"]);
+const BUDDY_NAMES=new Set(["paw","mono josh","vampire setro","greenanotherday","oasis","slimlua","licensed","dripmonger","hidden","quroven","setro","sayonarashigetora","kalin4444","armared","anben","kurt","thenotdave","minst_r","evilforge","sirin","nash","ielek","revxnant","keylocc","knobus","cosmic","khaotxc","erik","drakoooos","m1xm5","nrf_x","shirafune","verminnz","cartier361","ivorytemple","nano","steinmated","kingcowoe","nosrepp","data","thaiwonc","k1lluaa","jaleox","iphf","godkiri","captain 3","captain 7","androxius","dezstic","irazuka","rjeneration","avantiy","chassy","proxem1c"]);
 
 // Items that need exact name mapping (don't match keyword patterns)
 const SPECIFIC_SECTIONS={
@@ -3239,15 +3495,31 @@ const SPECIFIC_SECTIONS={
   'soul ticket':'Consumables',
   'ghost vial':'Consumables','reaper vial':'Consumables',
   'dullahan vial':'Consumables','soul vial':'Consumables',
+  // Consumables — colored character-themed items (not in sheet yet)
+  'abarai red':'Consumables','grimmjow blue':'Consumables','ishida white':'Consumables',
+  'jugram yellow':'Consumables','nelliel green':'Consumables','shihouin purple':'Consumables',
+  'yachiru pink':'Consumables','purifier':'Consumables','large bait':'Consumables',
   // Rerolls — foglio ha rinominato "Reroll" in "RR"/"RRs". Aggiungo qui i nomi
   // nuovi perché il pattern " rr"/" rrs" potrebbe collidere con altri nomi.
   'letzt model rr':'Rerolls','shikai/volt/res rrs':'Rerolls','clan rrs':'Rerolls',
   'flashstep color rr':'Rerolls','eyecolor rr':'Rerolls','sword color rr':'Rerolls',
   'arrancar mask rrs':'Rerolls','eyes rrs':'Rerolls','face rr':'Rerolls','marking rr':'Rerolls',
   'shunko rr':'Rerolls','buddy roll':'Rerolls','emote rrs':'Rerolls','potential music rr':'Rerolls',
+  // "Element Reroll" — same function as Shikai/Volt/Res Reroll, separate item.
+  // Trade value is resolved via TRADE_ALIASES (points to Shikai/Volt/Res RRs).
+  'element reroll':'Rerolls','element rr':'Rerolls','element rrs':'Rerolls',
+  // Rerolls — new types not in the sheet yet
+  'eyebrows rrs':'Rerolls','hair shade rrs':'Rerolls','hilt/handle rrs':'Rerolls',
+  'innerworld rrs':'Rerolls','mouth rrs':'Rerolls','resurreccion callout rrs':'Rerolls',
+  'shikai callout rrs':'Rerolls','vizard mask rrs':'Rerolls','vollstandig name rrs':'Rerolls',
+  'weapon appearence rrs':'Rerolls','weapon rrs':'Rerolls',
+  'legendary element rrs':'Rerolls','mythical element rrs':'Rerolls',
   // Cosmetics (override keyword rules)
   'haunted dawn cloak':'Cosmetics','creed emblem':'Cosmetics','cursed energy':'Cosmetics',
   'spookyfier 2.0':'Cosmetics',
+  // Cosmetics — new items not in the sheet yet
+  'hikone\'s kimono':'Cosmetics','ikomikidomoe\'s crest':'Cosmetics','ikomikidomoe\'s horns':'Cosmetics',
+  'min starrk mask':'Cosmetics','tiger king\'s pants':'Cosmetics','white kirishima horns':'Cosmetics',
   // Other (deprecato/sconosciuto)
   'custom bank':'Other','kisuke\'s boss elixir':'Other','kisukes boss elixir':'Other',
 };
@@ -3391,53 +3663,28 @@ function qaNavigate(e){
   const ac=document.getElementById('quick-add-ac');
   const items=ac.querySelectorAll('.qa-ac-item');
   if(!items.length)return;
-
-  // Tab / Shift+Tab: navigate the dropdown AND live-autocomplete the highlighted
-  // item into the input. The dropdown stays open so the user can keep Tabbing.
-  // Enter (or the Aggiungi button) is what actually adds the item.
-  if(e.key==='Tab' && ac.classList.contains('show')){
-    e.preventDefault();
-    items.forEach(i=>i.classList.remove('qa-ac-active'));
-    if(e.shiftKey){
-      qaAcIdx = qaAcIdx <= 0 ? items.length - 1 : qaAcIdx - 1;
-    } else {
-      qaAcIdx = qaAcIdx >= items.length - 1 ? 0 : qaAcIdx + 1;
-    }
-    items[qaAcIdx].classList.add('qa-ac-active');
-    items[qaAcIdx].scrollIntoView({block:'nearest'});
-    // Live autocomplete: fill the input with the highlighted item's canonical name
-    document.getElementById('quick-add-input').value =
-      items[qaAcIdx].querySelector('.qa-ac-name').textContent;
-    return;
-  }
-
-  // Enter: ALWAYS add the item. If an item is currently highlighted (via Arrow
-  // keys or Tab), fill the input with its name first, then call quickAddItem().
-  // This makes the flow: type → Tab to autocomplete → Enter to add (one press).
-  if(e.key==='Enter'){
-    e.preventDefault();
-    if(qaAcIdx >= 0 && items[qaAcIdx]){
-      document.getElementById('quick-add-input').value =
-        items[qaAcIdx].querySelector('.qa-ac-name').textContent;
-    }
-    ac.classList.remove('show');
-    qaAcIdx=-1;
-    quickAddItem();
-    return;
-  }
-
-  if(e.key==='ArrowDown'){
+  const acOpen=ac.classList.contains('show');
+  // Tab behaves like ArrowDown (with Shift+Tab like ArrowUp) so keyboard
+  // users can navigate the dropdown without arrow keys.
+  if(e.key==='ArrowDown'||(e.key==='Tab'&&!e.shiftKey&&acOpen)){
     e.preventDefault();
     items.forEach(i=>i.classList.remove('qa-ac-active'));
     qaAcIdx=Math.min(qaAcIdx+1,items.length-1);
     items[qaAcIdx].classList.add('qa-ac-active');
     items[qaAcIdx].scrollIntoView({block:'nearest'});
-  }else if(e.key==='ArrowUp'){
+  }else if(e.key==='ArrowUp'||(e.key==='Tab'&&e.shiftKey&&acOpen&&qaAcIdx>0)){
     e.preventDefault();
     items.forEach(i=>i.classList.remove('qa-ac-active'));
     qaAcIdx=Math.max(qaAcIdx-1,0);
     items[qaAcIdx].classList.add('qa-ac-active');
     items[qaAcIdx].scrollIntoView({block:'nearest'});
+  }else if(e.key==='Enter'&&qaAcIdx>=0){
+    e.preventDefault();
+    document.getElementById('quick-add-input').value=items[qaAcIdx].querySelector('.qa-ac-name').textContent;
+    ac.classList.remove('show');qaAcIdx=-1;
+    // Only autocomplete. To add the item, press Enter again (with the field
+    // filled) or click the "Aggiungi" button — same behavior as a click on
+    // the dropdown item.
   }else if(e.key==='Escape'){
     ac.classList.remove('show');qaAcIdx=-1;
   }
@@ -3448,10 +3695,10 @@ function qaNavigate(e){
   const input=document.getElementById('quick-add-input');
   const ac=document.getElementById('quick-add-ac');
   input.addEventListener('input',()=>qaShowAc(input.value.trim()));
-  // All key handling (Tab navigation, Enter to add, Arrow keys, Escape) is done
-  // inside qaNavigate — no duplicate Enter handler here, otherwise quickAddItem
-  // would be called twice when Enter is pressed.
-  input.addEventListener('keydown',qaNavigate);
+  input.addEventListener('keydown',e=>{
+    qaNavigate(e);
+    if(e.key==='Enter'&&qaAcIdx<0){e.preventDefault();quickAddItem();}
+  });
   input.addEventListener('blur',()=>setTimeout(()=>ac.classList.remove('show'),150));
   document.getElementById('quick-add-qty').addEventListener('keydown',e=>{
     if(e.key==='Enter'){e.preventDefault();quickAddItem();}
@@ -3710,7 +3957,7 @@ function buildThemeSettings(){
     card.innerHTML=`
       <div class="theme-card-name" style="color:${t.accent}">${t.name}</div>
       <div class="theme-card-preview">${t.swatches.map(c=>`<div class="theme-swatch" style="background:${c}"></div>`).join('')}</div>
-      <div class="theme-card-label">${t.desc}</div>`;
+      <div class="theme-card-label">${typeof t.desc==='object'?(t.desc[LANG]||t.desc.it):t.desc}</div>`;
     card.onclick=()=>{ editingCustomId=null; applyTheme(id); };
     grid.appendChild(card);
   });
