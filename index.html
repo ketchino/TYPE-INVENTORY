@@ -303,6 +303,12 @@ body.vpanel-open #bottombar{right:var(--panel-w);}
 .item-row.dragging{opacity:.4;}
 .item-row.drag-over{border-top:2px solid var(--theme-accent);margin-top:-1px;padding-top:3px;}
 .win-body.drag-target{background:var(--red-glow);}
+/* Drag-and-drop feedback for Trade Calc */
+.tc-item[draggable="true"]{cursor:grab;}
+.tc-item[draggable="true"]:active{cursor:grabbing;}
+.tc-item.dragging{opacity:.4;}
+.tc-item.drag-over{border-top:2px solid var(--theme-accent);margin-top:-1px;padding-top:3px;}
+.tc-items.drag-target{background:var(--red-glow);}
 .item-row.search-match .item-name{color:#fff;}
 .item-name{flex:1;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-icon{font-size:11px;flex-shrink:0;width:16px;text-align:center;opacity:.7;line-height:1;}
@@ -415,6 +421,8 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
 .tc-kan-input{flex:1;background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--val-gold);font-size:11px;font-family:inherit;font-weight:600;padding:3px 6px;outline:none;text-align:right;min-width:0;-moz-appearance:textfield;}
 .tc-kan-input:focus{border-color:var(--val-gold);}
 .tc-kan-input::-webkit-inner-spin-button,.tc-kan-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.tc-kan-input::placeholder{color:var(--dim);opacity:.4;font-weight:400;}
+.tc-kan-input:placeholder-shown{color:var(--dim);}
 .tc-addrow{display:flex;gap:3px;padding:4px 5px 3px;border-top:1px solid var(--border);flex-shrink:0;position:relative;}
 .tc-add-input{flex:1;min-width:0;background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;font-family:inherit;padding:3px 5px;outline:none;}
 .tc-add-input:focus{border-color:var(--red-dim);}
@@ -2097,12 +2105,15 @@ function buildWinBody(sec,items){
       row.addEventListener('dragstart',e=>{
         row.classList.add('dragging');
         e.dataTransfer.effectAllowed='move';
-        e.dataTransfer.setData('text/plain',JSON.stringify({sec,idx}));
+        // Include item name so it can be dropped on the Trade Calc.
+        // type:'inv' identifies the source as an inventory row.
+        e.dataTransfer.setData('text/plain',JSON.stringify({type:'inv',sec,idx,name:item.name,qty:item.qty}));
       });
       row.addEventListener('dragend',()=>{
         row.classList.remove('dragging');
         document.querySelectorAll('.item-row.drag-over').forEach(r=>r.classList.remove('drag-over'));
         document.querySelectorAll('.win-body.drag-target').forEach(b=>b.classList.remove('drag-target'));
+        document.querySelectorAll('.tc-items.drag-target').forEach(b=>b.classList.remove('drag-target'));
       });
       row.addEventListener('dragover',e=>{
         e.preventDefault();
@@ -2120,6 +2131,21 @@ function buildWinBody(sec,items){
         row.classList.remove('drag-over');
         try{
           const src=JSON.parse(e.dataTransfer.getData('text/plain'));
+          // Drop from Trade Calc → add to inventory
+          if(src.type==='tc'){
+            const d=loadData();
+            if(!d[sec])d[sec]=[];
+            const ex=d[sec].find(i=>i.name.toLowerCase()===src.name.toLowerCase());
+            if(ex){ex.qty+=src.qty;}
+            else{d[sec].push({name:src.name,qty:src.qty});}
+            saveData(d);
+            refreshWin(sec);
+            updateAllPcts();
+            updateTotalDisplay();
+            toast(`"${src.name}" ${t('addedIn')} ${sec}`);
+            return;
+          }
+          // Drop from another inventory section → move
           if(src.sec===sec&&src.idx===idx)return; // same item
           moveItem(src.sec,src.idx,sec);
         }catch{}
@@ -2134,18 +2160,29 @@ function buildWinBody(sec,items){
     body.classList.add('drag-target');
   });
   body.addEventListener('dragleave',e=>{
-    // Only remove highlight if leaving the body entirely
     if(!body.contains(e.relatedTarget))body.classList.remove('drag-target');
   });
   body.addEventListener('drop',e=>{
     e.preventDefault();
     body.classList.remove('drag-target');
-    // If the drop target was a row, the row's drop handler already handled it
-    // (with stopPropagation). If we get here, the drop was on the body itself
-    // (empty area or end of list) — move the item to this section.
     if(e.target.closest('.item-row'))return;
     try{
       const src=JSON.parse(e.dataTransfer.getData('text/plain'));
+      // Drop from Trade Calc → add to inventory
+      if(src.type==='tc'){
+        const d=loadData();
+        if(!d[sec])d[sec]=[];
+        const ex=d[sec].find(i=>i.name.toLowerCase()===src.name.toLowerCase());
+        if(ex){ex.qty+=src.qty;}
+        else{d[sec].push({name:src.name,qty:src.qty});}
+        saveData(d);
+        refreshWin(sec);
+        updateAllPcts();
+        updateTotalDisplay();
+        toast(`"${src.name}" ${t('addedIn')} ${sec}`);
+        return;
+      }
+      // Drop from another inventory section → move
       moveItem(src.sec,src.idx,sec);
     }catch{}
   });
@@ -3242,7 +3279,7 @@ function buildTradeCalcWin(){
   body.style.cssText='display:flex;flex-direction:column;padding:0;overflow:hidden;';
   const tcBody=document.createElement('div');
   tcBody.className='tc-body';tcBody.id='tc-body';
-  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0 KAN</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-give-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" value="0" oninput="tcSetKan('give',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0 KAN</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-receive-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" value="0" oninput="tcSetKan('receive',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
+  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0 KAN</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-give-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" oninput="tcSetKan('give',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0 KAN</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-receive-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" oninput="tcSetKan('receive',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
   body.appendChild(tcBody);
   const result=document.createElement('div');
   result.className='tc-result';result.id='tc-result';
@@ -3258,13 +3295,14 @@ function buildTradeCalcWin(){
   makeTcResizable(tcWin,rsz);
   setupTcAutocomplete('give');
   setupTcAutocomplete('receive');
+  setupTcDropZones();
   return tcWin;
 }
 
 function makeTcDraggable(win,handle){
   let dx,dy,dragging=false;
   handle.addEventListener('mousedown',e=>{
-    if(e.target.closest('.tc-confirm-btn,.tc-clear-btn,.tc-btn-add,.tc-add-input,.tc-kan-input,.step-btn,.step-input'))return;
+    if(e.target.closest('.tc-confirm-btn,.tc-clear-btn,.tc-btn-add,.tc-add-input,.tc-kan-input,.tc-item,.step-btn,.step-input'))return;
     dragging=true;dx=e.clientX-win.offsetLeft;dy=e.clientY-win.offsetTop;
     win.classList.add('dragging');win.style.zIndex=10;e.preventDefault();
   });
@@ -3279,7 +3317,7 @@ function makeTcDraggable(win,handle){
     saveTcPos(win.offsetLeft,win.offsetTop);expandCanvas();
   });
   handle.addEventListener('touchstart',e=>{
-    if(e.target.closest('.tc-confirm-btn,.tc-clear-btn,.tc-btn-add,.tc-add-input,.tc-kan-input,.step-btn,.step-input'))return;
+    if(e.target.closest('.tc-confirm-btn,.tc-clear-btn,.tc-btn-add,.tc-add-input,.tc-kan-input,.tc-item,.step-btn,.step-input'))return;
     const t=e.touches[0];dx=t.clientX-win.offsetLeft;dy=t.clientY-win.offsetTop;
     dragging=true;win.classList.add('dragging');win.style.zIndex=10;
   },{passive:true});
@@ -3318,11 +3356,11 @@ function makeTcResizable(win,handle){
 
 function clearTradeCalc(){
   tcData={give:[],receive:[],giveKan:0,receiveKan:0};
-  // Reset KAN input fields too
+  // Clear KAN input fields (empty, not '0' — the placeholder shows '0' faded)
   const gk=document.getElementById('tc-give-kan');
-  if(gk)gk.value='0';
+  if(gk)gk.value='';
   const rk=document.getElementById('tc-receive-kan');
-  if(rk)rk.value='0';
+  if(rk)rk.value='';
   tcRenderSide('give');tcRenderSide('receive');tcUpdateResult();
 }
 
@@ -3426,21 +3464,91 @@ function tcRenderSide(side){
       const valText=val>0?formatValue(val):'--';
       const row=document.createElement('div');
       row.className='tc-item';
+      // Drag-and-drop: tc items are draggable to inventory windows.
+      row.draggable=true;
       row.innerHTML=`<span class="tc-item-name" title="${escHtml(item.name)}">${escHtml(item.name)}</span><span class="tc-item-val ${tier}">${valText}</span><span class="tc-item-qty">\u00d7${item.qty}</span><button class="tc-item-del">\u2715</button>`;
       row.querySelector('.tc-item-del').onclick=()=>tcRemoveItem(side,idx);
+      // Drag from Trade Calc to inventory
+      row.addEventListener('dragstart',e=>{
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed='move';
+        // type:'tc' identifies the source as a Trade Calc row.
+        e.dataTransfer.setData('text/plain',JSON.stringify({type:'tc',side,idx,name:item.name,qty:item.qty}));
+      });
+      row.addEventListener('dragend',()=>{
+        row.classList.remove('dragging');
+        document.querySelectorAll('.tc-item.drag-over').forEach(r=>r.classList.remove('drag-over'));
+        document.querySelectorAll('.tc-items.drag-target').forEach(b=>b.classList.remove('drag-target'));
+        document.querySelectorAll('.win-body.drag-target').forEach(b=>b.classList.remove('drag-target'));
+      });
+      // Drop from inventory on this tc row → add item to this tc side
+      row.addEventListener('dragover',e=>{
+        e.preventDefault();
+        e.dataTransfer.dropEffect='move';
+        row.classList.add('drag-over');
+      });
+      row.addEventListener('dragleave',()=>row.classList.remove('drag-over'));
+      row.addEventListener('drop',e=>{
+        e.preventDefault();
+        e.stopPropagation();
+        row.classList.remove('drag-over');
+        try{
+          const src=JSON.parse(e.dataTransfer.getData('text/plain'));
+          if(src.type==='inv'){
+            const v=getTradeValue(src.name);
+            const ex=tcData[side].find(i=>i.name.toLowerCase()===src.name.toLowerCase());
+            if(ex){ex.qty+=1;}
+            else{tcData[side].push({name:src.name,qty:1,val:v});}
+            tcRenderSide(side);tcUpdateResult();
+            return;
+          }
+        }catch{}
+      });
       container.appendChild(row);
     });
   }
   // Add KAN (real KAN) to the side total
   const kan=tcData[side+'Kan']||0;
   total+=kan;
-  // Show breakdown if KAN > 0: "1.2M + 500k KAN = 1.7M KAN"
   if(kan>0){
     const itemsTotal=total-kan;
     totalEl.textContent=formatValue(itemsTotal)+' + '+formatValue(kan)+' KAN';
   } else {
     totalEl.textContent=formatValue(total)+' KAN';
   }
+}
+
+/* Registers drag-and-drop drop handlers on the Trade Calc items containers.
+   Called once when the Trade Calc window is built, so the handlers don't
+   accumulate on every tcRenderSide call. */
+function setupTcDropZones(){
+  ['give','receive'].forEach(side=>{
+    const container=document.getElementById('tc-'+side+'-items');
+    if(!container)return;
+    container.addEventListener('dragover',e=>{
+      e.preventDefault();
+      e.dataTransfer.dropEffect='move';
+      container.classList.add('drag-target');
+    });
+    container.addEventListener('dragleave',e=>{
+      if(!container.contains(e.relatedTarget))container.classList.remove('drag-target');
+    });
+    container.addEventListener('drop',e=>{
+      e.preventDefault();
+      container.classList.remove('drag-target');
+      if(e.target.closest('.tc-item'))return; // handled by the row
+      try{
+        const src=JSON.parse(e.dataTransfer.getData('text/plain'));
+        if(src.type==='inv'){
+          const v=getTradeValue(src.name);
+          const ex=tcData[side].find(i=>i.name.toLowerCase()===src.name.toLowerCase());
+          if(ex){ex.qty+=1;}
+          else{tcData[side].push({name:src.name,qty:1,val:v});}
+          tcRenderSide(side);tcUpdateResult();
+        }
+      }catch{}
+    });
+  });
 }
 
 function tcUpdateResult(){
