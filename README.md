@@ -2,7 +2,7 @@
 
 A fan-made inventory & trading tool for **Type Soul** (Roblox).
 
-Built because I was tired of updating my trade list manually every time, set the font, the color, etc... so I made this up.
+Built because I was tired of updating my trade list manually every time, set the font, the color, etc... so I made this up with the assistance of AI.
 
 **[Live demo](https://ketchino.github.io/TYPE-INVENTORY/)**
 
