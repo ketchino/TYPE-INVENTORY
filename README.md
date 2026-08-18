@@ -82,10 +82,6 @@ Plain HTML, CSS, and JavaScript. No frameworks, no build step, no dependencies â
 
 This is an **unofficial, non-profit, fan-made tool**. Trade value data comes from a community-maintained Google Sheet and isn't claimed as original work. All names, characters, and IP related to *Type Soul* and *Bleach* belong to their respective owners. This project is not affiliated with, endorsed by, or connected to Type Soul, Bleach, Roblox, or their rights holders.
 
-## License
-
-See [LICENSE](./LICENSE.txt) â€” all rights reserved on the original code/implementation, with the exceptions noted above for third-party data and IP.
-
 ## Credits
 
 Made by **ketchino**.
