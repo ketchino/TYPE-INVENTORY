@@ -223,7 +223,6 @@ body.vpanel-open #canvas{margin-right:var(--panel-w);}
 .my-kan-btn:hover{background:rgba(46,204,113,0.2);border-color:var(--theme-accent);box-shadow:0 0 8px rgba(46,204,113,0.25);}
 .my-kan-btn.active{background:rgba(46,204,113,0.25);border-color:var(--theme-accent);}
 .my-kan-icon{font-size:13px;opacity:.95;font-weight:800;}
-.my-kan-unit{font-size:10px;opacity:.7;font-weight:600;}
 
 /* ===== MY KAN WINDOW (movable, like Trade Calc/Wishlist) ===== */
 .mk-win .win-body{display:flex;flex-direction:column;padding:0;overflow:hidden;}
@@ -647,6 +646,9 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
 #history-stats b{color:var(--text);font-weight:600;}
 #history-stats .hs-profit{color:var(--val-green);}
 #history-stats .hs-loss{color:var(--red);}
+#history-chart-wrap{padding:6px 10px 4px;border-bottom:1px solid var(--border);background:var(--bg3);}
+#history-chart-title{font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin-bottom:2px;}
+#history-chart{display:block;width:100%;}
 #history-body::-webkit-scrollbar{width:4px;}
 #history-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
 .hist-entry{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px 10px;margin-bottom:6px;}
@@ -694,17 +696,18 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
     <button class="tbtn lang-btn" id="lang-toggle" onclick="toggleLang()">🇮🇹</button>
     <button class="tbtn" id="btn-tc" onclick="toggleTradeCalc(this)">TRADING CALC</button>
     <button class="tbtn" id="btn-wl" onclick="toggleWishlist(this)">LOOKING FOR</button>
-    <button class="tbtn tbtn-undo" id="undo-btn" onclick="doUndo(this)">↩</button>
+    <button class="tbtn tbtn-undo" id="undo-btn" onclick="doUndo()">↩</button>
+    <button class="tbtn tbtn-undo" id="redo-btn" onclick="doRedo()">↪</button>
     <div class="topbar-group">
       <button class="tbtn" id="main-menu-btn" onclick="toggleMainMenu(this)">☰</button>
       <div class="menu-dropdown" id="main-menu">
-        <div class="md-item" onclick="event.stopPropagation();toggleValues(this)"><span class="md-icon">👁</span>Nascondi/Mostra valori</div>
-        <div class="md-item" onclick="event.stopPropagation();toggleControls(this)"><span class="md-icon">⌨</span>Nascondi/Mostra controlli</div>
+        <div class="md-item" onclick="event.stopPropagation();toggleValues(this)"><span class="md-icon">👁</span><span class="md-label" data-i18n="hideShowValues">Nascondi/Mostra valori</span></div>
+        <div class="md-item" onclick="event.stopPropagation();toggleControls(this)"><span class="md-icon">⌨</span><span class="md-label" data-i18n="hideShowControls">Nascondi/Mostra controlli</span></div>
         <div class="md-sep"></div>
-        <div class="md-item" onclick="closeAllMenus();toggleQuickAddRow()"><span class="md-icon">➕</span>Quick Add</div>
+        <div class="md-item" onclick="closeAllMenus();toggleQuickAddRow()"><span class="md-icon">➕</span><span class="md-label" data-i18n="quickAddMenu">Quick Add</span></div>
         <div class="md-sep"></div>
-        <div class="md-item" onclick="closeAllMenus();exportTxt()"><span class="md-icon">📤</span>Esporta TXT</div>
-        <div class="md-item" onclick="closeAllMenus();importTxt()"><span class="md-icon">📥</span>Importa TXT</div>
+        <div class="md-item" onclick="closeAllMenus();exportTxt()"><span class="md-icon">📤</span><span class="md-label" data-i18n="exportTxt">Esporta TXT</span></div>
+        <div class="md-item" onclick="closeAllMenus();importTxt()"><span class="md-icon">📥</span><span class="md-label" data-i18n="importTxt">Importa TXT</span></div>
         <div class="md-sep"></div>
         <div class="md-item md-submenu-trigger">
           <span class="md-icon">📋</span><span class="md-label" data-i18n="copyDiscord">Copia Discord</span><span class="md-submenu-arrow">▸</span>
@@ -713,17 +716,17 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
             <div class="md-item md-submenu-item" onclick="closeAllMenus();copyDiscordText(this)"><span class="md-icon">📝</span><span class="md-label" data-i18n="copyText">Copia Testo</span></div>
           </div>
         </div>
-        <div class="md-item" onclick="closeAllMenus();syncSheetValues(true)"><span class="md-icon">🔄</span>Aggiorna valori</div>
-        <div class="md-item" onclick="closeAllMenus();openHistory()"><span class="md-icon">📜</span>Storico Trade</div>
-        <div class="md-item" onclick="closeAllMenus();resetLayout()"><span class="md-icon">↺</span>Reset layout</div>
+        <div class="md-item" onclick="closeAllMenus();syncSheetValues(true)"><span class="md-icon">🔄</span><span class="md-label" data-i18n="syncValues">Aggiorna valori</span></div>
+        <div class="md-item" onclick="closeAllMenus();openHistory()"><span class="md-icon">📜</span><span class="md-label" data-i18n="tradeHistory">Storico Trade</span></div>
+        <div class="md-item" onclick="closeAllMenus();resetLayout()"><span class="md-icon">↺</span><span class="md-label" data-i18n="resetLayout">Reset layout</span></div>
         <div class="md-sep"></div>
-        <div class="md-item" onclick="closeAllMenus();openSettings()"><span class="md-icon">⚙</span>Impostazioni</div>
+        <div class="md-item" onclick="closeAllMenus();openSettings()"><span class="md-icon">⚙</span><span class="md-label" data-i18n="settings">Impostazioni</span></div>
       </div>
     </div>
     <span id="total-value"></span>
     <div id="my-kan-wrap">
       <button id="my-kan-btn" class="my-kan-btn" type="button" aria-label="My KAN" onclick="event.stopPropagation();toggleMyKan(this)">
-        <span class="my-kan-icon">$</span><span id="my-kan-value">0</span><span class="my-kan-unit">KAN</span>
+        <span class="my-kan-icon">$</span><span id="my-kan-value">0</span>
       </button>
     </div>
     <input type="file" id="import-file" accept=".txt" style="display:none" onchange="doImportTxt(this)">
@@ -777,43 +780,43 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
     <div id="settings-body">
       <div id="settings-left">
         <div class="settings-tabs">
-          <div class="settings-tab active" onclick="switchSettingsTab(0,this)">Colori Discord</div>
-          <div class="settings-tab" onclick="switchSettingsTab(1,this)">Layout</div>
-          <div class="settings-tab" onclick="switchSettingsTab(2,this)">Tema</div>
+          <div class="settings-tab active" onclick="switchSettingsTab(0,this)" data-i18n="discordColors">Colori Discord</div>
+          <div class="settings-tab" onclick="switchSettingsTab(1,this)" data-i18n="layoutTab">Layout</div>
+          <div class="settings-tab" onclick="switchSettingsTab(2,this)" data-i18n="themeTab">Tema</div>
         </div>
         <div class="settings-panel active" id="settings-panel-colors">
-          <div class="settings-section-title">Colori sezioni (Discord ANSI)</div>
+          <div class="settings-section-title" data-i18n="sectionColors">Colori sezioni (Discord ANSI)</div>
           <div id="color-settings-rows"></div>
-          <p class="settings-note">I colori vengono usati nell'esportazione Discord. Clicca il quadrato per cambiare colore.</p>
+          <p class="settings-note" data-i18n="sectionColorsNote">I colori vengono usati nell'esportazione Discord. Clicca il quadrato per cambiare colore.</p>
         </div>
         <div class="settings-panel" id="settings-panel-layout">
-          <div class="settings-section-title">Sezioni visibili e ordine</div>
+          <div class="settings-section-title" data-i18n="visibleSectionsOrder">Sezioni visibili e ordine</div>
           <div id="layout-settings-rows"></div>
-          <p class="settings-note">Trascina le righe per cambiare l'ordine nell'esportazione. Usa l'interruttore per nascondere sezioni.</p>
+          <p class="settings-note" data-i18n="layoutNote">Trascina le righe per cambiare l'ordine nell'esportazione. Usa l'interruttore per nascondere sezioni.</p>
         </div>
         <div class="settings-panel" id="settings-panel-theme">
-          <div class="settings-section-title">Tema interfaccia</div>
+          <div class="settings-section-title" data-i18n="interfaceTheme">Tema interfaccia</div>
           <div id="theme-settings-grid"></div>
           <div id="custom-theme-editor">
-            <div class="cte-title">Tema personalizzato</div>
-            <div class="cte-row cte-name-row"><span class="cte-label">Nome tema</span><input type="text" id="cte-name" class="cte-name-input" maxlength="20" placeholder="Nome tema"></div>
-            <div class="cte-row"><span class="cte-label">Accent</span><div class="cte-color"><div class="cte-color-inner" id="cte-accent-inner"></div><input type="color" id="cte-accent" value="#c0392b"></div><span class="cte-hex" id="cte-accent-hex">#c0392b</span></div>
-            <div class="cte-row"><span class="cte-label">Sfondo</span><div class="cte-color"><div class="cte-color-inner" id="cte-bg-inner"></div><input type="color" id="cte-bg" value="#0d0d0d"></div><span class="cte-hex" id="cte-bg-hex">#0d0d0d</span></div>
-            <div class="cte-row"><span class="cte-label">Sfondo scuro</span><div class="cte-color"><div class="cte-color-inner" id="cte-bg3-inner"></div><input type="color" id="cte-bg3" value="#1a1a1a"></div><span class="cte-hex" id="cte-bg3-hex">#1a1a1a</span></div>
-            <div class="cte-row"><span class="cte-label">Bordi</span><div class="cte-color"><div class="cte-color-inner" id="cte-border-inner"></div><input type="color" id="cte-border" value="#2a2a2a"></div><span class="cte-hex" id="cte-border-hex">#2a2a2a</span></div>
-            <div class="cte-row"><span class="cte-label">Testo</span><div class="cte-color"><div class="cte-color-inner" id="cte-text-inner"></div><input type="color" id="cte-text" value="#e0e0e0"></div><span class="cte-hex" id="cte-text-hex">#e0e0e0</span></div>
-            <div class="cte-row"><span class="cte-label">Testo secondario</span><div class="cte-color"><div class="cte-color-inner" id="cte-muted-inner"></div><input type="color" id="cte-muted" value="#888888"></div><span class="cte-hex" id="cte-muted-hex">#888888</span></div>
-            <div class="cte-row"><span class="cte-label">Input sfondo</span><div class="cte-color"><div class="cte-color-inner" id="cte-inputbg-inner"></div><input type="color" id="cte-inputbg" value="#111111"></div><span class="cte-hex" id="cte-inputbg-hex">#111111</span></div>
+            <div class="cte-title" data-i18n="customThemeTitle">Tema personalizzato</div>
+            <div class="cte-row cte-name-row"><span class="cte-label" data-i18n="cteName">Nome tema</span><input type="text" id="cte-name" class="cte-name-input" maxlength="20" placeholder="Nome tema"></div>
+            <div class="cte-row"><span class="cte-label" data-i18n="cteAccent">Accent</span><div class="cte-color"><div class="cte-color-inner" id="cte-accent-inner"></div><input type="color" id="cte-accent" value="#c0392b"></div><span class="cte-hex" id="cte-accent-hex">#c0392b</span></div>
+            <div class="cte-row"><span class="cte-label" data-i18n="cteBg">Sfondo</span><div class="cte-color"><div class="cte-color-inner" id="cte-bg-inner"></div><input type="color" id="cte-bg" value="#0d0d0d"></div><span class="cte-hex" id="cte-bg-hex">#0d0d0d</span></div>
+            <div class="cte-row"><span class="cte-label" data-i18n="cteBg3">Sfondo scuro</span><div class="cte-color"><div class="cte-color-inner" id="cte-bg3-inner"></div><input type="color" id="cte-bg3" value="#1a1a1a"></div><span class="cte-hex" id="cte-bg3-hex">#1a1a1a</span></div>
+            <div class="cte-row"><span class="cte-label" data-i18n="cteBorder">Bordi</span><div class="cte-color"><div class="cte-color-inner" id="cte-border-inner"></div><input type="color" id="cte-border" value="#2a2a2a"></div><span class="cte-hex" id="cte-border-hex">#2a2a2a</span></div>
+            <div class="cte-row"><span class="cte-label" data-i18n="cteText">Testo</span><div class="cte-color"><div class="cte-color-inner" id="cte-text-inner"></div><input type="color" id="cte-text" value="#e0e0e0"></div><span class="cte-hex" id="cte-text-hex">#e0e0e0</span></div>
+            <div class="cte-row"><span class="cte-label" data-i18n="cteMuted">Testo secondario</span><div class="cte-color"><div class="cte-color-inner" id="cte-muted-inner"></div><input type="color" id="cte-muted" value="#888888"></div><span class="cte-hex" id="cte-muted-hex">#888888</span></div>
+            <div class="cte-row"><span class="cte-label" data-i18n="cteInputbg">Input sfondo</span><div class="cte-color"><div class="cte-color-inner" id="cte-inputbg-inner"></div><input type="color" id="cte-inputbg" value="#111111"></div><span class="cte-hex" id="cte-inputbg-hex">#111111</span></div>
             <div class="cte-actions">
-              <button class="cte-btn del" id="cte-delete">Cancella</button>
-              <button class="cte-btn save" id="cte-save">Salva &amp; Applica</button>
+              <button class="cte-btn del" id="cte-delete" data-i18n="cteDelete">Cancella</button>
+              <button class="cte-btn save" id="cte-save" data-i18n="cteSave">Salva &amp; Applica</button>
             </div>
           </div>
-          <p class="settings-note">Scegli un tema ispirato a Bleach o crea il tuo tema personalizzato. I colori dell'interfaccia cambieranno istantaneamente.</p>
+          <p class="settings-note" data-i18n="themeNote">Scegli un tema ispirato a Bleach o crea il tuo tema personalizzato. I colori dell'interfaccia cambieranno istantaneamente.</p>
         </div>
       </div>
       <div id="settings-right">
-        <div class="settings-section-title">Preview Discord</div>
+        <div class="settings-section-title" data-i18n="discordPreviewTitle">Preview Discord</div>
         <div id="discord-preview-wrap"></div>
       </div>
     </div>
@@ -824,13 +827,17 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
 <div id="history-overlay" onclick="if(event.target===this)closeHistory()">
   <div id="history-modal">
     <div id="history-header">
-      <h3>Storico Trade</h3>
+      <h3 data-i18n="tradeHistoryTitle">Storico Trade</h3>
       <div style="display:flex;gap:6px;align-items:center">
-        <button class="hist-clear" onclick="clearHistory()">Cancella tutto</button>
+        <button class="hist-clear" onclick="clearHistory()" data-i18n="clearAll">Cancella tutto</button>
         <button id="history-close" onclick="closeHistory()" style="background:none;border:1px solid var(--border);color:var(--muted);width:24px;height:24px;border-radius:4px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;">✕</button>
       </div>
     </div>
     <div id="history-stats"></div>
+    <div id="history-chart-wrap">
+      <div id="history-chart-title" data-i18n="profitChart"></div>
+      <canvas id="history-chart" height="130"></canvas>
+    </div>
     <div id="history-body"></div>
   </div>
 </div>
@@ -879,6 +886,7 @@ const I18N={
   "cantDeleteLastProfile":{it:"Impossibile eliminare l'ultimo profilo",en:"Cannot delete the last profile"},
   "loadingValues":{it:"Caricamento valori...",en:"Loading values..."},
   "dragToReorder":{it:"Trascina per riordinare",en:"Drag to reorder"},
+  "clickToEdit":{it:"Clicca per modificare",en:"Click to edit"},
   "tradeHistory":{it:"Storico Trade",en:"Trade History"},
   "resetLayout":{it:"Reset layout",en:"Reset layout"},
   "settings":{it:"Impostazioni",en:"Settings"},
@@ -891,6 +899,12 @@ const I18N={
   "addedIn":{it:"aggiunto in",en:"added in"},
   "updatedIn":{it:"aggiornato in",en:"updated in"},
   "actionUndone":{it:"Azione annullata",en:"Action undone"},
+  "actionRedone":{it:"Azione ripristinata",en:"Action redone"},
+  "undo":{it:"Annulla",en:"Undo"},
+  "redo":{it:"Ripristina",en:"Redo"},
+  "profitChart":{it:"Andamento profitti",en:"Profit trend"},
+  "footerText":{it:"Strumento non profitto fatto da fan. Non affiliato a, approvato da o connesso a Type Soul.",en:"This is a non-profit, fan-made inventory helper tool. Not affiliated with, endorsed by, or connected to Type Soul."},
+  "discordPreviewTitle":{it:"Preview Discord",en:"Discord Preview"},
   // Trade calc
   "tradeCalcTitle":{it:"Calcolatore Trade",en:"Trade Calculator"},
   "confirm":{it:"Conferma",en:"Confirm"},
@@ -1022,50 +1036,33 @@ function applyLang(){
   const qaQty=document.getElementById('quick-add-qty');
   if(qaQty)qaQty.title=t('qty');
   // Menu items
-  // Update only the text label, NOT the icon. The previous implementation did
-  // el.innerHTML = icon.outerHTML + text, which serialized & re-parsed the icon
-  // every time applyLang ran. That occasionally dropped emoji glyphs (race
-  // conditions during font loading, or .md-icon not being present yet on a
-  // re-entry). Updating only the text node is safer and preserves the icon.
-  // Exclude .md-submenu-trigger and .md-submenu-item (handled via data-i18n below).
-  const mdItems=document.querySelectorAll('.menu-dropdown > .md-item:not(.md-submenu-trigger)');
-  const menuTexts=[t('hideShowValues'),t('hideShowControls'),t('quickAddMenu'),t('exportTxt'),t('importTxt'),t('syncValues'),t('tradeHistory'),t('resetLayout'),t('settings')];
-  mdItems.forEach((el,i)=>{
-    if(!menuTexts[i])return;
-    // Find or create a text node container after the .md-icon
-    let label=el.querySelector('.md-label');
-    if(!label){
-      // First-time setup: wrap existing text in a span so we can update it
-      // without touching the icon element.
-      const icon=el.querySelector('.md-icon');
-      // Remove loose text nodes
-      Array.from(el.childNodes).forEach(n=>{
-        if(n.nodeType===3){el.removeChild(n);}
-      });
-      label=document.createElement('span');
-      label.className='md-label';
-      if(icon){el.insertBefore(label,icon.nextSibling);}
-      else{el.appendChild(label);}
-    }
-    label.textContent=menuTexts[i];
-  });
-  // Info box (top-right): translate all data-i18n attributes inside the popover
-  document.querySelectorAll('#info-box-popover [data-i18n]').forEach(el=>{
+  // BUGFIX: the old implementation assigned labels POSITIONALLY via
+  // querySelectorAll('.menu-dropdown > .md-item') + an ordered array of
+  // texts. The selector also matched the profile menu (it shares the
+  // .menu-dropdown class), shifting every main-menu label by one: the item
+  // labeled "Importa TXT" really called exportTxt(), "Aggiorna valori"
+  // called importTxt(), and "Impostazioni" appeared twice.
+  // Now every label carries a data-i18n key in the HTML and is translated
+  // by key — order-independent and immune to menu structure changes.
+  // SINGLE GLOBAL PASS: one [data-i18n] selector covers menus, info box,
+  // settings modal, history modal and footer. No per-area passes needed.
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
     const key=el.getAttribute('data-i18n');
     if(key)el.textContent=t(key);
   });
-  // Submenu (Copia Discord → Copia Colori / Copia Testo): translate data-i18n
-  document.querySelectorAll('.md-submenu [data-i18n], .md-submenu-trigger [data-i18n]').forEach(el=>{
-    const key=el.getAttribute('data-i18n');
-    if(key)el.textContent=t(key);
-  });
-  // Profile menu: translate data-i18n
-  document.querySelectorAll('#profile-menu [data-i18n]').forEach(el=>{
-    const key=el.getAttribute('data-i18n');
-    if(key)el.textContent=t(key);
-  });
+  // Undo/Redo button tooltips
+  const uBtn=document.getElementById('undo-btn');
+  if(uBtn)uBtn.title=t('undo');
+  const rBtn=document.getElementById('redo-btn');
+  if(rBtn)rBtn.title=t('redo');
+  // Window add-row placeholders: windows are NOT rebuilt on language switch,
+  // so refresh their placeholders here.
+  document.querySelectorAll('.add-input').forEach(el=>el.placeholder=t('item'));
+  // Main-menu + Discord submenu + profile menu labels are all handled above
+  // via the generic .menu-dropdown [data-i18n] pass.
   // Re-sync My KAN tooltips (they use translated strings)
   if(typeof updateMyKanDisplay==='function')updateMyKanDisplay();
+  if(typeof rebuildMyKanLang==='function')rebuildMyKanLang();
   // Settings modal
   const settingsH3=document.querySelector('#settings-header h3');
   if(settingsH3)settingsH3.textContent=t('settingsTitle');
@@ -2257,22 +2254,49 @@ function loadLayout(){
 }
 function saveLayout(l){localStorage.setItem(profileKey(LKEY),JSON.stringify(l));}
 
+let redoStack=null;
+function updateUndoRedoBtns(){
+  const u=document.getElementById('undo-btn');
+  const r=document.getElementById('redo-btn');
+  if(u)u.classList.toggle('has-undo',!!undoStack);
+  if(r)r.classList.toggle('has-undo',!!redoStack);
+}
 function pushUndo(){
   undoStack=JSON.stringify(loadData());
-  const btn=document.getElementById('undo-btn');
-  btn.classList.add('has-undo');
+  redoStack=null; // a new action invalidates the redo branch
+  updateUndoRedoBtns();
 }
-function doUndo(btn){
+function doUndo(){
   if(!undoStack)return;
+  // Keep the current (mutated) state so it can be restored by Redo
+  redoStack=JSON.stringify(loadData());
   saveData(JSON.parse(undoStack));
   undoStack=null;
-  btn.classList.remove('has-undo');
+  updateUndoRedoBtns();
   Object.keys(loadData()).forEach(sec=>refreshWin(sec));
   toast(t('actionUndone'));
 }
+function doRedo(){
+  if(!redoStack)return;
+  // Keep the undone state so Undo becomes available again
+  undoStack=JSON.stringify(loadData());
+  saveData(JSON.parse(redoStack));
+  redoStack=null;
+  updateUndoRedoBtns();
+  Object.keys(loadData()).forEach(sec=>refreshWin(sec));
+  toast(t('actionRedone'));
+}
 document.addEventListener('keydown',e=>{
-  if((e.ctrlKey||e.metaKey)&&e.key==='z'){
-    doUndo(document.getElementById('undo-btn'));
+  // Don't hijack Ctrl+Z / Ctrl+Y while typing in inputs/textareas:
+  // native text undo/redo must keep working there.
+  const tag=(e.target&&e.target.tagName)||'';
+  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){
+    e.preventDefault();
+    if(e.shiftKey)doRedo();else doUndo();
+  }
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){
+    e.preventDefault();doRedo();
   }
 });
 
@@ -2362,7 +2386,7 @@ function buildWinBody(sec,items){
         <span class="item-icon ${secClass(sec)}">${secIcon}</span><span class="item-name" title="${escHtml(item.name)}">${escHtml(item.name)}</span>${trendBadge(item.name)}
         <span class="item-val ${tier}">${valText}</span>
         <button class="btn btn-minus">−</button>
-        <span class="qty" title="Clicca per modificare">\u00d7${item.qty}</span>
+        <span class="qty" title="${t('clickToEdit')}">\u00d7${item.qty}</span>
         <button class="btn btn-plus">+</button>
         <button class="btn btn-del">\u2715</button>`;
       row.querySelector('.qty').onclick=function(){makeQtyEditable(this,sec,idx);};
@@ -2469,8 +2493,11 @@ function buildWinBody(sec,items){
       moveItem(src.sec,src.idx,sec);
     }catch{}
   });
-  const q=document.getElementById('search').value.trim().toLowerCase();
-  if(q)doSearch(q);
+  // NOTE: the active search filter is NOT re-applied here on purpose: this
+  // body is still detached from the DOM at this point, so doSearch()
+  // (which queries document.querySelectorAll) cannot see its rows.
+  // The re-application happens in refreshWin() / renderAll() AFTER the
+  // body is attached (see BUGFIX comments there).
   return body;
 }
 
@@ -2526,7 +2553,7 @@ function refreshWin(sec){
   const secVal=calcSectionValue(items);
   const secValEl=win.querySelector('.win-secval');
   if(secValEl){
-    secValEl.textContent=secVal>0?formatValue(secVal)+' KAN':'';
+    secValEl.textContent=secVal>0?formatValue(secVal):'';
     secValEl.style.display=secVal>0?'':'none';
   }
   // Save scroll position before replacing body
@@ -2538,6 +2565,12 @@ function refreshWin(sec){
   win.classList.toggle('win-empty',items.length===0);
   updateTotalDisplay();
   updateAllPcts();
+  // BUGFIX: rebuilding the body wipes the search-hide classes from the rows,
+  // so re-apply the active search filter once the new body is in the DOM.
+  // Without this, +/−/delete/edit/add made the category show ALL items
+  // instead of only the search matches.
+  const sq=document.getElementById('search').value.trim();
+  if(sq)doSearch(sq);
 }
 
 function renderAll(){
@@ -2581,7 +2614,7 @@ function renderAll(){
 
     const hdr=document.createElement('div');
     hdr.className='win-header';
-    hdr.innerHTML=`<button class="win-collapse" title="${t('collapseExpand')}">▼</button><span class="win-title-icon ${secClass(sec)}">${SECTION_ICONS[sec]||''}</span><span class="win-title">${sec}</span><div class="win-header-right"><span class="win-pct">${pct}%</span><span class="win-secval" style="display:${secVal>0?'':'none'}">${secVal>0?formatValue(secVal)+' KAN':''}</span><span class="win-count">${items.length}</span></div>`;
+    hdr.innerHTML=`<button class="win-collapse" title="${t('collapseExpand')}">▼</button><span class="win-title-icon ${secClass(sec)}">${SECTION_ICONS[sec]||''}</span><span class="win-title">${escHtml(sec)}</span><div class="win-header-right"><span class="win-pct">${pct}%</span><span class="win-secval" style="display:${secVal>0?'':'none'}">${secVal>0?formatValue(secVal):''}</span><span class="win-count">${items.length}</span></div>`;
     hdr.querySelector('.win-collapse').onclick=function(e){
       e.stopPropagation();
       win.classList.toggle('collapsed');
@@ -2665,6 +2698,10 @@ function renderAll(){
   if(mkWin)canvas.appendChild(mkWin);
   updateTotalDisplay();
   expandCanvas();
+  // BUGFIX: re-apply the active search after a full re-render (undo, profile
+  // switch, reset layout, import...) so filtered categories stay filtered.
+  const sq=document.getElementById('search').value.trim();
+  if(sq)doSearch(sq);
 }
 
 function expandCanvas(){
@@ -2881,7 +2918,10 @@ function saveMkPos(p){localStorage.setItem(MK_POS_KEY,JSON.stringify(p));}
 function updateMyKanDisplay(){
   const v=loadMyKan();
   const invVal=calcTotalValue();
-  const net=invVal+v;
+  // BUGFIX: item values are relative units ("k"), NOT real KAN. Adding the
+  // real KAN balance to them mixed two different scales, so the net worth
+  // now counts ONLY the inventory value and is shown without the KAN label.
+  const net=invVal;
   // Badge text
   const badge=document.getElementById('my-kan-value');
   if(badge)badge.textContent=formatValue(v);
@@ -2889,14 +2929,14 @@ function updateMyKanDisplay(){
   const cur=document.getElementById('mk-current-val');
   if(cur)cur.textContent=v.toLocaleString();
   const netEl=document.getElementById('mk-networth-val');
-  if(netEl)netEl.textContent=formatValue(net)+' KAN';
+  if(netEl)netEl.textContent=formatValue(net);
   const input=document.getElementById('mk-input');
   if(input&&document.activeElement!==input)input.value=v;
   // Tooltips on both badges (in theme, no "relative units" disclaimer)
   const myKanBtn=document.getElementById('my-kan-btn');
-  if(myKanBtn)myKanBtn.title=t('myKanTooltipMine')+'\n'+t('myKanNetWorth')+': '+formatValue(net)+' KAN';
+  if(myKanBtn)myKanBtn.title=t('myKanTooltipMine')+'\n'+t('myKanNetWorth')+': '+formatValue(net);
   const invBtn=document.getElementById('total-value');
-  if(invBtn)invBtn.title=t('myKanTooltipInv')+'\n'+t('myKanNetWorth')+': '+formatValue(net)+' KAN';
+  if(invBtn)invBtn.title=t('myKanTooltipInv')+'\n'+t('myKanNetWorth')+': '+formatValue(net);
 }
 function toggleMyKan(btn){
   mkVisible=!mkVisible;
@@ -2937,7 +2977,7 @@ function buildMyKanWin(){
       <div class="mk-current"><span id="mk-current-val">0</span> KAN</div>
       <div class="mk-networth-row">
         <span>${t('myKanNetWorth')}:</span>
-        <span id="mk-networth-val" class="mk-networth">0 KAN</span>
+        <span id="mk-networth-val" class="mk-networth">0</span>
       </div>
     </div>
     <div class="mk-section">
@@ -3500,14 +3540,15 @@ function rebuildMyKanLang(){
   if(!body)return;
   const v=loadMyKan();
   const invVal=calcTotalValue();
-  const net=invVal+v;
+  // BUGFIX: net worth = inventory value only (relative "k" units), no real
+  // KAN summed in and no KAN label next to it.
   body.innerHTML=`
     <div class="mk-section">
       <div class="mk-section-title">$ ${t('myKanTitle')}</div>
       <div class="mk-current"><span id="mk-current-val">${v.toLocaleString()}</span> KAN</div>
       <div class="mk-networth-row">
         <span>${t('myKanNetWorth')}:</span>
-        <span id="mk-networth-val" class="mk-networth">${formatValue(net)} KAN</span>
+        <span id="mk-networth-val" class="mk-networth">${formatValue(invVal)}</span>
       </div>
     </div>
     <div class="mk-section">
@@ -3562,7 +3603,7 @@ function buildTradeCalcWin(){
   body.style.cssText='display:flex;flex-direction:column;padding:0;overflow:hidden;';
   const tcBody=document.createElement('div');
   tcBody.className='tc-body';tcBody.id='tc-body';
-  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0 KAN</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-give-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" oninput="tcSetKan('give',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0 KAN</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-receive-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" oninput="tcSetKan('receive',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
+  tcBody.innerHTML=`<div class="tc-side" id="tc-give-side"><div class="tc-side-header"><div class="tc-side-title give">${t('youGive')}</div><div class="tc-side-total" id="tc-give-total">0</div></div><div class="tc-items" id="tc-give-items"><div class="tc-empty">${t('addItemsGive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-give-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" oninput="tcSetKan('give',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-give-ac"></div><input class="tc-add-input" id="tc-give-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-give-qty',-1)">−</button><input class="step-input" id="tc-give-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-give-qty',1)">+</button></div><button class="tc-btn-add" onclick="tcAddItem('give')">+</button></div></div><div class="tc-divider"></div><div class="tc-side" id="tc-receive-side"><div class="tc-side-header"><div class="tc-side-title receive">${t('youReceive')}</div><div class="tc-side-total" id="tc-receive-total">0</div></div><div class="tc-items" id="tc-receive-items"><div class="tc-empty">${t('addItemsReceive')}</div></div><div class="tc-kan-row"><span class="tc-kan-label">${t('tcKanLabel')}</span><input class="tc-kan-input" id="tc-receive-kan" type="number" min="0" step="any" placeholder="${t('tcKanPlaceholder')}" oninput="tcSetKan('receive',this.value)"></div><div class="tc-addrow"><div class="tc-ac" id="tc-receive-ac"></div><input class="tc-add-input" id="tc-receive-input" placeholder="${t('item')}" type="text" autocomplete="off"><div class="stepper sm"><button class="step-btn" onclick="stepEl('tc-receive-qty',-1)">−</button><input class="step-input" id="tc-receive-qty" type="number" min="1" value="1"><button class="step-btn" onclick="stepEl('tc-receive-qty',1)">+</button></div><button class="tc-btn-add receive-btn" onclick="tcAddItem('receive')">+</button></div></div>`;
   body.appendChild(tcBody);
   const result=document.createElement('div');
   result.className='tc-result';result.id='tc-result';
@@ -3795,9 +3836,9 @@ function tcRenderSide(side){
   total+=kan;
   if(kan>0){
     const itemsTotal=total-kan;
-    totalEl.textContent=formatValue(itemsTotal)+' + '+formatValue(kan)+' KAN';
+    totalEl.textContent=formatValue(itemsTotal)+' + '+formatValue(kan);
   } else {
-    totalEl.textContent=formatValue(total)+' KAN';
+    totalEl.textContent=formatValue(total);
   }
 }
 
@@ -3848,7 +3889,7 @@ function tcUpdateResult(){
     valEl.textContent='--';valEl.className='tc-result-value even';detailEl.textContent='';return;
   }
   const prefix=diff>0?'+':'';
-  valEl.textContent=prefix+formatValue(diff)+' KAN';
+  valEl.textContent=prefix+formatValue(diff);
   if(diff>0){valEl.className='tc-result-value profit';detailEl.textContent=t('tcProfit');}
   else if(diff<0){valEl.className='tc-result-value loss';detailEl.textContent=t('tcLoss');}
   else{valEl.className='tc-result-value even';detailEl.textContent=t('tcEven');}
@@ -4444,13 +4485,15 @@ function buildThemeSettings(){
     card.className='theme-card custom-card has-saved'+(ct.id===current?' active':'');
     card.dataset.theme=ct.id;
     const swatches=[ct.bg,ct.bg3,ct.accent,ct.border];
+    // Security: theme name and colors come from localStorage (user-editable /
+    // potentially tampered) — always escape the name and sanitize the colors.
     card.innerHTML=`
       <div class="theme-card-actions">
         <button class="theme-card-action edit" title="${t('customThemeTitle')}">✎</button>
         <button class="theme-card-action del" title="${t('cteDelete')}">✕</button>
       </div>
-      <div class="theme-card-name" style="color:${ct.accent}">${ct.name||t('customTheme')}</div>
-      <div class="theme-card-preview">${swatches.map(c=>`<div class="theme-swatch" style="background:${c}"></div>`).join('')}</div>
+      <div class="theme-card-name" style="color:${safeColor(ct.accent)}">${escHtml(ct.name||t('customTheme'))}</div>
+      <div class="theme-card-preview">${swatches.map(c=>`<div class="theme-swatch" style="background:${safeColor(c)}"></div>`).join('')}</div>
       <div class="theme-card-label">${t('customTheme')}</div>`;
     // Edit button
     card.querySelector('.theme-card-action.edit').onclick=function(e){
@@ -4587,12 +4630,12 @@ function buildColorSettings(){
     const row=document.createElement('div');
     row.className='color-row';
     row.innerHTML=`
-      <span class="color-row-label">${sec}</span>
+      <span class="color-row-label">${escHtml(sec)}</span>
       <div class="color-swatch" style="border-color:${hex}">
         <div class="color-swatch-inner" style="background:${hex}"></div>
-        <input type="color" value="${hex}" data-sec="${sec}">
+        <input type="color" value="${hex}" data-sec="${escHtml(sec)}">
       </div>
-      <span class="color-ansi">${ansiCode.replace(/\x1b/g,'\\e')}</span>`;
+      <span class="color-ansi">${escHtml(ansiCode.replace(/\x1b/g,'\\e'))}</span>`;
     const input=row.querySelector('input[type="color"]');
     input.addEventListener('input',e=>{
       // Find closest ANSI color to the picked hex
@@ -4642,8 +4685,8 @@ function buildLayoutSettings(){
     row.dataset.sec=sec;
     row.innerHTML=`
       <span class="layout-row-order">${i+1}</span>
-      <span class="layout-row-name">${sec}</span>
-      <div class="layout-row-toggle${hidden?'':' on'}" data-sec="${sec}" title="${hidden?'Nascondi':'Visibile'}"></div>`;
+      <span class="layout-row-name">${escHtml(sec)}</span>
+      <div class="layout-row-toggle${hidden?'':' on'}" data-sec="${escHtml(sec)}" title="${hidden?t('hideLabel'):t('visibleLabel')}"></div>`;
     // Toggle visibility
     row.querySelector('.layout-row-toggle').addEventListener('click',function(){
       const secName=this.dataset.sec;
@@ -4740,6 +4783,10 @@ function updateDiscordPreview(){
   preview.innerHTML=html;
 }
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+/* Security: only allow safe color syntaxes (hex like #rgb/#rrggbb[aa]) into
+   style attributes. Anything else (potentially injected via tampered
+   localStorage, e.g. custom theme data) falls back to a neutral gray. */
+function safeColor(c){c=String(c||'').trim();return /^#[0-9a-fA-F]{3,8}$/.test(c)?c:'#333';}
 
 /* ===== ANIMATED VALUE ===== */
 function updateTotalDisplay(){
@@ -4754,7 +4801,7 @@ function updateTotalDisplay(){
   } else {
     if(animFrame){cancelAnimationFrame(animFrame);animFrame=null;}
     animCurrentVal=0;
-    el.textContent='0 KAN';
+    el.textContent='0';
   }
   // Also update My KAN badge + Net Worth tooltip (inventory value changed)
   if(typeof updateMyKanDisplay==='function')updateMyKanDisplay();
@@ -4764,13 +4811,13 @@ function animateValue(){
   const diff=animTargetVal-animCurrentVal;
   if(Math.abs(diff)<1){
     animCurrentVal=animTargetVal;
-    el.textContent=formatValue(Math.round(animCurrentVal))+' KAN';
+    el.textContent=formatValue(Math.round(animCurrentVal));
     el.classList.remove('bump');
     animFrame=null;
     return;
   }
   animCurrentVal+=diff*0.2;
-  el.textContent=formatValue(Math.round(animCurrentVal))+' KAN';
+  el.textContent=formatValue(Math.round(animCurrentVal));
   el.classList.add('bump');
   setTimeout(()=>el.classList.remove('bump'),150);
   animFrame=requestAnimationFrame(animateValue);
@@ -4992,7 +5039,7 @@ function refreshWishlist(){
 
   let total=0;
   wl.forEach(i=>{total+=getTradeValue(i.name)*i.qty;});
-  totalEl.textContent=total>0?t('lfTotal')+' '+formatValue(total)+' KAN':'';
+  totalEl.textContent=total>0?t('lfTotal')+' '+formatValue(total):'';
 }
 
 function showWlAc(query,acDrop){
@@ -5088,14 +5135,87 @@ function renderHistoryStats(){
   const s=loadStats();
   const net=s.totalReceive-s.totalGive;
   const netClass=net>0?'hs-profit':net<0?'hs-loss':'';
-  const netStr=(net>0?'+':'')+formatValue(net)+' KAN';
+  const netStr=(net>0?'+':'')+formatValue(net);
   el.innerHTML=`<span>${t('totalTrades')}: <b>${s.count}</b></span><span>${t('netProfitLoss')}: <b class="${netClass}">${netStr}</b></span>`;
+}
+
+/* ===== PROFIT TREND CHART =====
+   Draws (in the history modal) the cumulative net value over time from the
+   trade history: one point per trade, chronological order (history array is
+   newest-first, so it gets reversed). Values are computed with the CURRENT
+   trade values — same as the list below, so the chart always matches it.
+   Pure canvas, no dependencies. */
+function renderHistoryChart(){
+  const cv=document.getElementById('history-chart');
+  if(!cv)return;
+  const wrap=cv.parentElement;
+  const W=Math.max(wrap.clientWidth||460,200), H=130, P=10;
+  // HiDPI: draw at 2x and scale down via CSS (crisp on retina screens)
+  cv.width=W*2;cv.height=H*2;
+  cv.style.width=W+'px';cv.style.height=H+'px';
+  const ctx=cv.getContext('2d');
+  ctx.setTransform(2,0,0,2,0,0);
+  ctx.clearRect(0,0,W,H);
+  const hist=loadHistory().slice().reverse(); // oldest → newest
+  const diffs=hist.map(e=>{
+    let g=0,r=0;
+    (e.give||[]).forEach(i=>g+=getTradeValue(i.name)*i.qty);
+    (e.receive||[]).forEach(i=>r+=getTradeValue(i.name)*i.qty);
+    return r-g;
+  });
+  if(!diffs.length){
+    ctx.fillStyle='#555';ctx.font='10px sans-serif';ctx.textAlign='center';
+    ctx.fillText(t('noTradeHistory'),W/2,H/2);
+    return;
+  }
+  let c=0;const cum=diffs.map(d=>(c+=d));
+  const all=[0,...cum];
+  const min=Math.min(...all),max=Math.max(...all);
+  const span=(max-min)||1;
+  const x=i=>diffs.length===1?W/2:P+(i/(diffs.length-1))*(W-2*P);
+  const y=v=>H-P-((v-min)/span)*(H-2*P-8);
+  // Zero baseline
+  ctx.strokeStyle='rgba(255,255,255,.14)';ctx.lineWidth=1;
+  ctx.setLineDash([3,3]);
+  ctx.beginPath();ctx.moveTo(0,y(0));ctx.lineTo(W,y(0));ctx.stroke();
+  ctx.setLineDash([]);
+  const up=cum[cum.length-1]>=0;
+  const lineCol=up?'#2ecc71':'#c0392b';
+  // Area under the cumulative line
+  const grad=ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0,up?'rgba(46,204,113,.28)':'rgba(192,57,43,.28)');
+  grad.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.beginPath();
+  cum.forEach((v,i)=>{i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v));});
+  ctx.lineTo(x(cum.length-1),y(0));ctx.lineTo(x(0),y(0));ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+  // Cumulative line
+  ctx.beginPath();
+  cum.forEach((v,i)=>{i?ctx.lineTo(x(i),y(v)):ctx.moveTo(x(i),y(v));});
+  ctx.strokeStyle=lineCol;ctx.lineWidth=2;ctx.lineJoin='round';ctx.stroke();
+  // Per-trade bars (small, at the bottom)
+  const bw=Math.max(1.5,Math.min(6,(W-2*P)/diffs.length-2));
+  diffs.forEach((d,i)=>{
+    const bx=x(i)-bw/2;
+    ctx.fillStyle=d>0?'rgba(46,204,113,.55)':d<0?'rgba(192,57,43,.55)':'rgba(241,196,15,.55)';
+    if(d===0){ctx.fillRect(bx,y(0)-1,bw,2);}
+    else if(d>0){ctx.fillRect(bx,y(d),bw,y(0)-y(d));}
+    else{ctx.fillRect(bx,y(0),bw,y(d)-y(0));}
+  });
+  // Last point + final value label
+  const last=cum[cum.length-1];
+  ctx.beginPath();ctx.arc(x(cum.length-1),y(last),3,0,Math.PI*2);
+  ctx.fillStyle=lineCol;ctx.fill();
+  ctx.font='bold 11px sans-serif';ctx.textAlign='right';
+  ctx.fillStyle=lineCol;
+  ctx.fillText((last>0?'+':'')+formatValue(last),W-P,Math.max(10,y(last)-6));
 }
 
 function openHistory(){
   document.getElementById('history-overlay').classList.add('open');
   renderHistory();
   renderHistoryStats();
+  renderHistoryChart();
 }
 function closeHistory(){
   document.getElementById('history-overlay').classList.remove('open');
@@ -5104,6 +5224,8 @@ function clearHistory(){
   if(!confirm(t('clearHistoryConfirm')))return;
   saveHistory([]);
   renderHistory();
+  renderHistoryStats();
+  renderHistoryChart();
   toast(t('historyCleared'));
 }
 function renderHistory(){
@@ -5143,6 +5265,6 @@ confirmTrade=function(){
   _origConfirmTrade();
 };
 </script>
-<div id="bottombar"><span>Made by <em>ketch</em> — This is a non-profit, fan-made inventory helper tool. Not affiliated with, endorsed by, or connected to Type Soul.</span></div>
+<div id="bottombar"><span>Made by <em>ketch</em> — <span data-i18n="footerText">This is a non-profit, fan-made inventory helper tool. Not affiliated with, endorsed by, or connected to Type Soul.</span></span></div>
 </body>
 </html>
