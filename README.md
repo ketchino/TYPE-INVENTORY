@@ -21,7 +21,6 @@ The demo above is good for trying it out, but I'd recommend downloading the file
 - **Import / Export** — save your inventory as a `.txt` file (see disclaimer below before importing anything)
 - **Discord-ready export** — copy a formatted preview straight into Discord
 - **Value panel** — open a side panel from the left to see live trade values for every item at a glance
-- **My KAN / Net Worth** — track your actual KAN balance separately, use it in trades, and see your total net worth (inventory value + KAN)
 - **Language switch** — there's a button in the top bar to switch between Italian and English (more languages to come)
 
 ## How to use
@@ -41,7 +40,6 @@ The demo above is good for trying it out, but I'd recommend downloading the file
 - Click the **My KAN** badge in the top bar to open the KAN window.
 - Type an amount directly, or use the +/− shortcuts (100, 1k, 10k, 100k, 1M) to adjust it quickly.
 - Use "Reset" if you want to zero it out and start over.
-- Your KAN balance is added to your inventory value to show your total **net worth**.
 
 **Trade calculator**
 - Add items (and/or KAN) to both the "give" and "receive" side.
