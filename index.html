@@ -327,6 +327,9 @@ body.vpanel-open #bottombar{right:var(--panel-w);}
 .tc-item.drag-over{border-top:2px solid var(--theme-accent);margin-top:-1px;padding-top:3px;}
 .tc-items.drag-target{background:var(--red-glow);}
 .item-row.search-match .item-name{color:#fff;}
+/* Locate-while-typing: row in this category that matches the add-row input */
+.item-row.ac-locate{background:rgba(46,204,113,.12);box-shadow:inset 0 0 0 1px rgba(46,204,113,.35);}
+.item-row.ac-locate .item-name{font-weight:700;color:var(--val-green);}
 .item-name{flex:1;font-size:12px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .item-icon{font-size:11px;flex-shrink:0;width:16px;text-align:center;opacity:.7;line-height:1;}
 .item-icon.weapons{color:#e74c3c;}
@@ -344,6 +347,11 @@ body.vpanel-open #bottombar{right:var(--panel-w);}
 .item-val.tier-trash{color:var(--val-gray);background:rgba(102,102,102,0.08);}
 .item-val.no-val{color:#333;}
 body.hide-values .item-val{display:none;}
+/* Export-hidden toggle ("H"): items marked H are omitted from text exports */
+.btn-h{width:16px;height:16px;font-size:9px;font-weight:700;border-radius:3px;background:transparent;border:1px solid var(--border);color:var(--dim);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;line-height:1;padding:0;transition:all .15s;}
+.btn-h:hover{border-color:var(--red-dim);color:var(--red);background:var(--red-glow);}
+.btn-h.on{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 6px rgba(192,57,43,.4);}
+.item-row.h-x .item-name,.item-row.h-x .item-val{opacity:.45;}
 body.hide-values .win-secval{display:none;}
 .qty{font-size:12px;color:var(--muted);min-width:24px;text-align:center;flex-shrink:0;cursor:pointer;border-radius:4px;padding:1px 4px;background:rgba(255,255,255,.03);transition:all .12s;}
 .qty:hover{background:rgba(255,255,255,.07);color:var(--text);}
@@ -393,7 +401,7 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
 .btn-add:hover{background:var(--red);}
 
 /* autocomplete dropdown */
-.ac-dropdown{position:absolute;bottom:100%;left:0;right:0;background:var(--input-bg);border:1px solid var(--border2);border-radius:4px;max-height:180px;overflow-y:auto;z-index:50;display:none;margin-bottom:2px;box-shadow:0 -4px 16px rgba(0,0,0,.5);}
+.ac-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--input-bg);border:1px solid var(--border2);border-radius:4px;max-height:180px;overflow-y:auto;z-index:50;display:none;margin-top:2px;box-shadow:0 4px 16px rgba(0,0,0,.5);}
 .ac-dropdown.show{display:block;}
 .ac-dropdown::-webkit-scrollbar{width:3px;}
 .ac-dropdown::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
@@ -887,6 +895,7 @@ const I18N={
   "loadingValues":{it:"Caricamento valori...",en:"Loading values..."},
   "dragToReorder":{it:"Trascina per riordinare",en:"Drag to reorder"},
   "clickToEdit":{it:"Clicca per modificare",en:"Click to edit"},
+  "hideExportHint":{it:"Escludi dall'export testo",en:"Exclude from text export"},
   "tradeHistory":{it:"Storico Trade",en:"Trade History"},
   "resetLayout":{it:"Reset layout",en:"Reset layout"},
   "settings":{it:"Impostazioni",en:"Settings"},
@@ -1137,6 +1146,8 @@ const KNOWN_ITEMS={
   "Shikai Callout RRs":null,"Vizard Mask RRs":null,"Vollstandig Name RRs":null,
   "Weapon Appearence RRs":null,"Weapon RRs":null,
   "Legendary Element RRs":null,"Mythical Element RRs":null,
+  "Mask RRs":null,"Locked Element RRs":null,"Locked Clan RRs":null,
+  "Locked Shikai/Res/Volt Reroll":null,
   // Cosmetics
   "Hikone's Kimono":null,"Ikomikidomoe's Crest":null,"Ikomikidomoe's Horns":null,
   "Min Starrk Mask":null,"Tiger King's Pants":null,"White Kirishima Horns":null,
@@ -1934,10 +1945,38 @@ function showAutocomplete(input,dropdown,query){
       input.value=it.name;
       dropdown.classList.remove('show');
       input.focus();
+      const winEl=input.closest('.win');
+      if(winEl)locateExistingItem(winEl,it.name);
     };
     dropdown.appendChild(div);
   });
   dropdown.classList.add('show');
+}
+
+/* While typing in a window's add-row: if the typed name matches an item
+   already present in THAT category, scroll its row into view (centered)
+   and highlight it. The highlight is removed when the query is cleared,
+   no longer matches anything, or the window is re-rendered. */
+function locateExistingItem(win,query){
+  const body=win.querySelector('.win-body');
+  if(!body)return;
+  const prev=body.querySelector('.item-row.ac-locate');
+  if(prev)prev.classList.remove('ac-locate');
+  const q=(query||'').trim().toLowerCase();
+  if(!q)return;
+  const row=[...body.querySelectorAll('.item-row')]
+    .find(r=>!r.classList.contains('search-hide')&&((r.querySelector('.item-name')||{}).textContent||'').toLowerCase().includes(q));
+  if(row){
+    row.classList.add('ac-locate');
+    /* Scroll ONLY the window's own list (.win-body): compute the row's
+       center relative to the body's visible area and adjust body.scrollTop.
+       Unlike scrollIntoView (which also scrolls every scrollable ancestor,
+       i.e. the whole page), the window itself never moves on screen. */
+    const bRect=body.getBoundingClientRect();
+    const rRect=row.getBoundingClientRect();
+    const target=body.scrollTop+((rRect.top+rRect.height/2)-(bRect.top+bRect.height/2));
+    body.scrollTo({top:target,behavior:'smooth'});
+  }
 }
 
 function highlightMatch(text,q){
@@ -2375,7 +2414,7 @@ function buildWinBody(sec,items){
       const tierClass=val>=50000?'tier-hi':val>=5000?'tier-md':val>=500?'tier-lo':val>0?'tier-tr':'';
       const isDupe=dupeNames.has(item.name.toLowerCase());
       const row=document.createElement('div');
-      row.className='item-row'+(tierClass?' '+tierClass:'')+(isDupe?' dupe':'');
+      row.className='item-row'+(tierClass?' '+tierClass:'')+(isDupe?' dupe':'')+(item.h?' h-x':'');
       // Drag-and-drop: each row is draggable. data-sec and data-idx identify
       // the source item so the drop handler can move it to another section.
       row.draggable=true;
@@ -2385,6 +2424,7 @@ function buildWinBody(sec,items){
       row.innerHTML=`
         <span class="item-icon ${secClass(sec)}">${secIcon}</span><span class="item-name" title="${escHtml(item.name)}">${escHtml(item.name)}</span>${trendBadge(item.name)}
         <span class="item-val ${tier}">${valText}</span>
+        <button class="btn-h${item.h?' on':''}" title="${t('hideExportHint')}">H</button>
         <button class="btn btn-minus">−</button>
         <span class="qty" title="${t('clickToEdit')}">\u00d7${item.qty}</span>
         <button class="btn btn-plus">+</button>
@@ -2407,6 +2447,18 @@ function buildWinBody(sec,items){
         const name=d[sec][idx].name;
         d[sec].splice(idx,1);saveData(d);refreshWin(sec);
         toast(`"${name}" ${t('deleted')}`);
+      };
+      // "H" toggle: mark/unmark the item as hidden from TEXT exports
+      // (exportTxt, Discord copy). Values/net worth are NOT affected.
+      // The flag lives on the item object itself, so undo/redo, moves
+      // and migrations preserve it.
+      row.querySelector('.btn-h').onclick=()=>{
+        pushUndo();
+        const d=loadData();
+        const it=d[sec][idx];
+        if(!it)return;
+        if(it.h)delete it.h;else it.h=1;
+        saveData(d);refreshWin(sec);
       };
       // Drag-and-drop handlers
       row.addEventListener('dragstart',e=>{
@@ -2670,12 +2722,13 @@ function renderAll(){
     // Autocomplete events
     ni.addEventListener('input',()=>{
       showAutocomplete(ni,acDrop,ni.value.trim());
+      locateExistingItem(win,ni.value);
     });
     ni.addEventListener('keydown',e=>{
       acNavigate(ni,acDrop,e);
     });
     ni.addEventListener('focus',()=>{
-      if(ni.value.trim()) showAutocomplete(ni,acDrop,ni.value.trim());
+      if(ni.value.trim()){showAutocomplete(ni,acDrop,ni.value.trim());locateExistingItem(win,ni.value);}
     });
     ni.addEventListener('blur',()=>{
       setTimeout(()=>acDrop.classList.remove('show'),150);
@@ -3138,9 +3191,10 @@ function exportTxt(){
   const wl=loadWishlist();
   const lines=[];
   Object.entries(data).forEach(([sec,items])=>{
-    if(!items.length)return;
+    const vis=items.filter(i=>!i.h);
+    if(!vis.length)return;
     lines.push(sec+' :');
-    items.forEach(i=>lines.push(i.qty+'x '+i.name));
+    vis.forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   });
   if(wl.length){
@@ -3345,20 +3399,20 @@ function buildDiscordMessageText(){
   SECTION_ORDER.forEach(sec=>{
     if(HIDDEN_SECTIONS.includes(sec))return;
     const items=data[sec];
-    if(!items||!items.length)return;
+    if(!items||!items.length||!items.some(i=>!i.h))return;
     const color=SECTION_COLORS[sec]||'';
     lines.push(color+sec+':');
-    [...items].sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
+    [...items].filter(i=>!i.h).sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   });
   // Also export any sections not in SECTION_ORDER
   Object.entries(data).forEach(([sec,items])=>{
     if(SECTION_ORDER.includes(sec))return;
     if(HIDDEN_SECTIONS.includes(sec))return;
-    if(!items.length)return;
+    if(!items.length||!items.some(i=>!i.h))return;
     const color=SECTION_COLORS[sec]||'';
     lines.push(color+sec+':');
-    [...items].sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
+    [...items].filter(i=>!i.h).sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   });
   // LF: wishlist items
@@ -3381,17 +3435,17 @@ function buildDiscordPlainText(){
   SECTION_ORDER.forEach(sec=>{
     if(HIDDEN_SECTIONS.includes(sec))return;
     const items=data[sec];
-    if(!items||!items.length)return;
+    if(!items||!items.length||!items.some(i=>!i.h))return;
     lines.push(sec+':');
-    [...items].sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
+    [...items].filter(i=>!i.h).sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   });
   Object.entries(data).forEach(([sec,items])=>{
     if(SECTION_ORDER.includes(sec))return;
     if(HIDDEN_SECTIONS.includes(sec))return;
-    if(!items.length)return;
+    if(!items.length||!items.some(i=>!i.h))return;
     lines.push(sec+':');
-    [...items].sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
+    [...items].filter(i=>!i.h).sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   });
   const wl=loadWishlist();
@@ -3965,6 +4019,8 @@ function guessSection(name){
   if(BUDDY_NAMES.has(n))return 'Buddies';
   if(SPECIFIC_SECTIONS[n])return SPECIFIC_SECTIONS[n];
   if(n.includes('reroll')||n==='name/gender change'||n.includes('blessing'))return 'Rerolls';
+  // short community form of the reroll items ("Mask RRs", "Locked Clan RRs"...)
+  if(/\brrs?\b/.test(n))return 'Rerolls';
   if(n.includes('essence')&&!n.includes('accursed'))return 'Essences/Ultra Skill';
   if(n.includes('elixir'))return 'Elixirs';
   if(n.includes('vow'))return 'Essences/Ultra Skill';
@@ -4135,6 +4191,14 @@ function qaNavigate(e){
   document.getElementById('quick-add-qty').addEventListener('keydown',e=>{
     if(e.key==='Enter'){e.preventDefault();quickAddItem();}
   });
+  /* One-click guarantee while typing: mousedown used to blur the input,
+     which animated its width 360px -> 280px and slid every nearby button
+     out from under the cursor before mouseup — the click never landed and
+     a SECOND press was needed. preventDefault on mousedown keeps focus
+     (and thus the width/layout) stable, so the FIRST click always reaches
+     the button. quickAddItem() already refocuses the input afterwards. */
+  document.querySelectorAll('#quick-add-stepper .step-btn,.quick-add-btn')
+    .forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
 })();
 
 let animCurrentVal=0;
@@ -4752,10 +4816,10 @@ function updateDiscordPreview(){
   SECTION_ORDER.forEach(sec=>{
     if(HIDDEN_SECTIONS.includes(sec))return;
     const items=data[sec];
-    if(!items||!items.length)return;
+    if(!items||!items.length||!items.some(i=>!i.h))return;
     const color=ansiToVisual(SECTION_COLORS[sec]||'\x1b[0;37m');
     html+=`<div class="disc-prev-section" style="color:${color}">${escHtml(sec)}:</div>`;
-    [...items].sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>{
+    [...items].filter(i=>!i.h).sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>{
       html+=`<div class="disc-prev-item">${escHtml(i.qty+'x '+i.name)}</div>`;
     });
     html+=`<div style="margin-top:2px"></div>`;
@@ -4764,10 +4828,10 @@ function updateDiscordPreview(){
   Object.entries(data).forEach(([sec,items])=>{
     if(SECTION_ORDER.includes(sec))return;
     if(HIDDEN_SECTIONS.includes(sec))return;
-    if(!items.length)return;
+    if(!items.length||!items.some(i=>!i.h))return;
     const color=ansiToVisual(SECTION_COLORS[sec]||'\x1b[0;37m');
     html+=`<div class="disc-prev-section" style="color:${color}">${escHtml(sec)}:</div>`;
-    [...items].sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>{
+    [...items].filter(i=>!i.h).sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>{
       html+=`<div class="disc-prev-item">${escHtml(i.qty+'x '+i.name)}</div>`;
     });
     html+=`<div style="margin-top:2px"></div>`;
