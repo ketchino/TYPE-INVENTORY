@@ -72,7 +72,7 @@ The Export TXT feature is meant for backing up **your own** inventory.
 
 ## Security
 
-This tool is plain HTML/CSS/JavaScript with no build step — anyone can open it in a text editor and read exactly what it does, there's nothing hidden or compiled. If you want third-party confirmation it's clean, here's a VirusTotal scan of the file: **[VirusTotal report](https://www.virustotal.com/gui/file/dde7f88a59f4d4f254d9632773a90ab8c8198155f2a9ad7b5c4057f8c202d17d?nocache=1)**
+This tool is plain HTML/CSS/JavaScript with no build step — anyone can open it in a text editor and read exactly what it does, there's nothing hidden or compiled. If you want third-party confirmation it's clean, here's a VirusTotal scan of the file: **[VirusTotal report](https://www.virustotal.com/gui/file/bbc65f1e213df0b45941d521e0b53d0e9ee16638bbcb2b2ad1ee5a700a3d9d45?nocache=1)**
 
 ## Tech
 
