@@ -109,7 +109,12 @@
   --theme-name:'Starrk';
   --input-bg:#080e0e;--panel-bg:#040808;--header-bg:#0e1616;
 }
-body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;min-height:100vh;overflow:auto;}
+/* The page never scrolls: the app is a fixed desktop (topbar/bottombar/vpanel
+   are fixed, the canvas IS the viewport). overflow:hidden on html+body kills
+   both scrollbars; windows can't get lost — drag clamps + expandCanvas recovery
+   keep their headers inside the viewport. */
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:14px;}
 
 /* value panel - RIGHT SIDE */
 #vpanel{position:fixed;top:0;right:0;bottom:0;width:var(--panel-w);background:var(--panel-bg);border-left:1px solid var(--border);z-index:1100;display:flex;flex-direction:column;transition:transform .25s ease,opacity .25s ease;overflow:hidden;}
@@ -285,7 +290,13 @@ body.vpanel-open #bottombar{right:var(--panel-w);}
 /* windows */
 .win{position:absolute;border:1px solid var(--border2);border-radius:6px;background:var(--bg2);min-width:180px;min-height:80px;display:flex;flex-direction:column;overflow:visible;transition:border-color .2s;}
 .win.dragging{opacity:.9;box-shadow:0 8px 32px rgba(0,0,0,.5);}
-.win.win-empty{border-color:#1e1e1e;opacity:.5;}
+.win.win-empty{border-color:#1e1e1e;}
+/* opacity here (instead of on .win) keeps the visual "empty/faded" cue while
+   avoiding a stacking context on .win itself: opacity<1 would trap the .ac-dropdown
+   (z-index:50) inside the empty window, letting the windows below cover it and
+   steal clicks. .win-addrow (the dropdown's container) stays untrapped. */
+.win.win-empty .win-header,
+.win.win-empty .win-body{opacity:.45;}
 .win-header{background:var(--bg3);border-bottom:1px solid var(--border);padding:7px 10px;display:flex;align-items:center;justify-content:space-between;cursor:grab;user-select:none;flex-shrink:0;}
 .win-header:active{cursor:grabbing;}
 .win-title{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--red);}
@@ -352,6 +363,23 @@ body.hide-values .item-val{display:none;}
 .btn-h:hover{border-color:var(--red-dim);color:var(--red);background:var(--red-glow);}
 .btn-h.on{background:var(--red);border-color:var(--red);color:#fff;box-shadow:0 0 6px rgba(192,57,43,.4);}
 .item-row.h-x .item-name,.item-row.h-x .item-val{opacity:.45;}
+
+/* Hidden-items counter button + reactivate panel (H flag) */
+#hidden-btn .hidden-h{color:var(--red);font-weight:700;}
+#hidden-btn .hidden-count{margin-left:4px;}
+#hidden-panel{display:none;position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:6px;padding:6px 0;min-width:270px;max-width:380px;max-height:60vh;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.6);z-index:2001;}
+#hidden-panel.open{display:block;}
+.hp-title{font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);padding:2px 12px 6px;border-bottom:1px solid var(--border);margin-bottom:3px;}
+.hp-group-title{font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--theme-accent);padding:6px 12px 2px;}
+.hp-row{display:flex;align-items:center;gap:6px;padding:3px 12px;font-size:11px;color:var(--text);}
+.hp-row:hover{background:var(--red-glow);}
+.hp-row .hp-sec{color:var(--dim);font-size:9px;max-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex-shrink:0;}
+.hp-row .hp-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hp-row .hp-qty{color:var(--muted);font-size:10px;flex-shrink:0;}
+.hp-react{background:none;border:1px solid var(--border);color:var(--dim);border-radius:3px;cursor:pointer;font-size:9px;padding:2px 6px;flex-shrink:0;font-family:inherit;transition:all .1s;}
+.hp-react:hover{border-color:var(--red-dim);color:var(--text);}
+.hp-all{display:block;margin:6px 12px 3px;width:calc(100% - 24px);background:none;border:1px solid var(--border);color:var(--dim);border-radius:3px;cursor:pointer;font-size:10px;padding:4px 0;font-family:inherit;transition:all .1s;}
+.hp-all:hover{border-color:var(--red-dim);color:var(--text);}
 body.hide-values .win-secval{display:none;}
 .qty{font-size:12px;color:var(--muted);min-width:24px;text-align:center;flex-shrink:0;cursor:pointer;border-radius:4px;padding:1px 4px;background:rgba(255,255,255,.03);transition:all .12s;}
 .qty:hover{background:rgba(255,255,255,.07);color:var(--text);}
@@ -626,6 +654,7 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
 .wl-item-qty{font-size:10px;color:var(--muted);min-width:18px;text-align:center;flex-shrink:0;}
 .wl-item-del{background:none;border:1px solid #1e1e1e;color:#444;width:14px;height:14px;border-radius:3px;cursor:pointer;font-size:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:0;transition:all .1s;}
 .wl-item-del:hover{color:var(--red);border-color:var(--red-dim);}
+.wl-item.h-x .wl-item-name,.wl-item.h-x .wl-item-val,.wl-item.h-x .wl-item-qty{opacity:.45;}
 .wl-empty{color:var(--dim);font-size:10px;padding:6px;text-align:center;font-style:italic;}
 .wl-addrow{display:flex;gap:3px;padding:4px 5px 3px;border-top:1px solid var(--border);flex-shrink:0;position:relative;}
 .wl-add-input{flex:1;min-width:0;background:var(--input-bg);border:1px solid var(--border);border-radius:3px;color:var(--text);font-size:11px;font-family:inherit;padding:3px 5px;outline:none;}
@@ -710,6 +739,7 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
       <button class="tbtn" id="main-menu-btn" onclick="toggleMainMenu(this)">☰</button>
       <div class="menu-dropdown" id="main-menu">
         <div class="md-item" onclick="event.stopPropagation();toggleValues(this)"><span class="md-icon">👁</span><span class="md-label" data-i18n="hideShowValues">Nascondi/Mostra valori</span></div>
+        <div class="md-item" onclick="event.stopPropagation();toggleHExcludeValue()"><span class="md-icon" id="hval-check">○</span><span class="md-label" data-i18n="hExcludeValue">H esclude anche dal valore</span></div>
         <div class="md-item" onclick="event.stopPropagation();toggleControls(this)"><span class="md-icon">⌨</span><span class="md-label" data-i18n="hideShowControls">Nascondi/Mostra controlli</span></div>
         <div class="md-sep"></div>
         <div class="md-item" onclick="closeAllMenus();toggleQuickAddRow()"><span class="md-icon">➕</span><span class="md-label" data-i18n="quickAddMenu">Quick Add</span></div>
@@ -732,6 +762,8 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
       </div>
     </div>
     <span id="total-value"></span>
+    <!-- Hidden-items counter (H flag): visible only when at least one item is hidden -->
+    <button class="tbtn" id="hidden-btn" type="button" style="display:none" onclick="event.stopPropagation();toggleHiddenPanel()"><span class="hidden-h">H</span><span class="hidden-count" id="hidden-count">0</span></button>
     <div id="my-kan-wrap">
       <button id="my-kan-btn" class="my-kan-btn" type="button" aria-label="My KAN" onclick="event.stopPropagation();toggleMyKan(this)">
         <span class="my-kan-icon">$</span><span id="my-kan-value">0</span>
@@ -777,6 +809,9 @@ body.hide-controls .btn,body.hide-controls .btn-del,body.hide-controls .win-addr
 <div id="canvas"></div>
 
 <div id="toast"></div>
+
+<!-- Hidden-items reactivate panel (positioned under the topbar counter button) -->
+<div id="hidden-panel"></div>
 
 <!-- Settings Modal -->
 <div id="settings-overlay" onclick="if(event.target===this)closeSettings()">
@@ -896,6 +931,13 @@ const I18N={
   "dragToReorder":{it:"Trascina per riordinare",en:"Drag to reorder"},
   "clickToEdit":{it:"Clicca per modificare",en:"Click to edit"},
   "hideExportHint":{it:"Escludi dall'export testo",en:"Exclude from text export"},
+  "hExcludeValue":{it:"H esclude anche dal valore",en:"H also excludes from value"},
+  "hiddenCountTitle":{it:"Oggetti nascosti dall'export (H)",en:"Items hidden from export (H)"},
+  "hiddenPanelTitle":{it:"Oggetti nascosti dall'export",en:"Items hidden from export"},
+  "hiddenReactivate":{it:"Riattiva",en:"Show again"},
+  "hiddenReactivateAll":{it:"Riattiva tutti",en:"Show all"},
+  "hiddenGroupInv":{it:"Inventario",en:"Inventory"},
+  "hiddenGroupLf":{it:"Wishlist LF",en:"Wishlist LF"},
   "tradeHistory":{it:"Storico Trade",en:"Trade History"},
   "resetLayout":{it:"Reset layout",en:"Reset layout"},
   "settings":{it:"Impostazioni",en:"Settings"},
@@ -1059,6 +1101,8 @@ function applyLang(){
     const key=el.getAttribute('data-i18n');
     if(key)el.textContent=t(key);
   });
+  // Sync the H-excludes-value menu checkmark (icon is not i18n-driven)
+  syncHExcludeIcon();
   // Undo/Redo button tooltips
   const uBtn=document.getElementById('undo-btn');
   if(uBtn)uBtn.title=t('undo');
@@ -1120,6 +1164,13 @@ function applyLang(){
     if(tcWin&&tcWin.parentNode)rebuildTradeCalcLang();
     if(mkWin&&mkWin.parentNode)rebuildMyKanLang();
     buildThemeSettings();
+    // Hidden-items panel: re-render if open (its texts follow the language);
+    // also refresh the counter tooltip — the global tooltip system strips
+    // title attributes, so data-tt must be dropped to re-localize it.
+    const hp=document.getElementById('hidden-panel');
+    if(hp&&hp.classList.contains('open'))renderHiddenPanel();
+    const hb=document.getElementById('hidden-btn');
+    if(hb){hb.removeAttribute('data-tt');updateHiddenCount();}
   }
 }
 
@@ -1800,14 +1851,21 @@ function valueTier(v){
   return 'no-val';
 }
 
+/* Option (settings.hExcludeValue): when ON, items flagged with H are excluded
+   from ALL value totals (net worth, section values, percentages, LF total).
+   Default OFF: H only hides from TEXT exports (pre-Task-21 behavior). */
+function hExcludeValueOn(){return !!loadSettings().hExcludeValue;}
+
 function calcTotalValue(){
   const data=loadData();
+  const excl=hExcludeValueOn();
   let total=0;
   if(!data||typeof data!=='object') return 0;
   Object.values(data).forEach(items=>{
     if(!Array.isArray(items)) return;
     items.forEach(item=>{
       if(!item||!item.name) return;
+      if(excl&&item.h) return;
       const qty=typeof item.qty==='number'?item.qty:1;
       total+=getTradeValue(item.name)*qty;
     });
@@ -1818,12 +1876,32 @@ function calcTotalValue(){
 function calcSectionValue(items){
   let total=0;
   if(!Array.isArray(items)) return 0;
+  const excl=hExcludeValueOn();
   items.forEach(item=>{
     if(!item||!item.name) return;
+    if(excl&&item.h) return;
     const qty=typeof item.qty==='number'?item.qty:1;
     total+=getTradeValue(item.name)*qty;
   });
   return total;
+}
+
+/* Main-menu toggle for the option above. renderAll() refreshes window
+   headers (secval/pct) and calls updateTotalDisplay(), which in turn
+   refreshes the My KAN net-worth badge — one call covers everything.
+   refreshWishlist() is needed on top because the LF total in the window
+   follows this option too, and renderAll does not re-render its content. */
+function toggleHExcludeValue(){
+  const s=loadSettings();
+  s.hExcludeValue=!s.hExcludeValue;
+  saveSettings(s);
+  syncHExcludeIcon();
+  renderAll();
+  if(wlWin)refreshWishlist();
+}
+function syncHExcludeIcon(){
+  const el=document.getElementById('hval-check');
+  if(el)el.textContent=loadSettings().hExcludeValue?'\u25cf':'\u25cb';
 }
 
 function toggleValues(btn){
@@ -2185,6 +2263,23 @@ function loadData(){
 }
 function saveData(d){localStorage.setItem(profileKey(DKEY),JSON.stringify(d));}
 
+/* True when a name means the looking-for list (Task 22). Normalizes case,
+   spaces and punctuation, so "LF", "lf:", "Looking For", "L.F." all match.
+   Used by the TXT import (LF items must go to the wishlist, never to a
+   category) and by the one-shot migration (cleans up LF categories the old
+   import bug created). */
+function isLfSectionName(name){
+  const norm=String(name).toLowerCase().replace(/[^a-z0-9]+/g,'');
+  return norm==='lf'||norm==='lookingfor';
+}
+
+// Declared here (before migrateInventory runs) — the migration IIFE below
+// calls loadWishlist()/saveWishlist(), which reference WL_KEY. Declaring it
+// down in the wishlist section would throw a TDZ ReferenceError on first run
+// (silently swallowed by the migration's try/catch), breaking the wishlist
+// item renames during migration. (Fix from the user's Task-22 review.)
+const WL_KEY='bleach_wishlist_v1';
+
 /* ===== MIGRATION =====
    One-shot migration that runs on page load. Moves items to their correct
    section after the user changed the section taxonomy (renamed "Essences"
@@ -2287,6 +2382,55 @@ function saveData(d){localStorage.setItem(profileKey(DKEY),JSON.stringify(d));}
     console.warn('Migration failed:',e);
   }
 })();
+
+/* One-shot cleanup (Task 22): the old TXT import parsed a bare "LF:" header
+   (the app's own export format) as a CATEGORY and filed looking-for items
+   there. Dissolve any "LF"/"Looking for" section in EVERY profile: its items
+   merge into that profile's wishlist, then the section is deleted — an LF
+   category must never exist.
+   NOTE: runs at script-eval time (like migrateInventory) so it reads/writes
+   localStorage DIRECTLY with explicit keys + profile suffix: loadWishlist()
+   and saveWishlist() go through profileKey(), and activeProfileId is still
+   'default' at this point (profiles are restored later, at initProfiles) —
+   direct keys are what let this clean EVERY profile, active or not.
+   Key shape: 'bleach_inv_v6'[__<profileId>] <-> 'bleach_wishlist_v1'[__<profileId>]. */
+(function lfCategoryCleanup(){
+  const FLAG='bleach_lf_cleanup_v1';
+  const WKEY=WL_KEY; // same string, single source of truth (hoisted above)
+  if(localStorage.getItem(FLAG)==='done')return;
+  try{
+    Object.keys(localStorage).forEach(k=>{
+      if(k!==DKEY&&!k.startsWith(DKEY+'__'))return; // inventory keys only
+      const suffix=k===DKEY?'':k.slice(DKEY.length);
+      let d=null;
+      try{d=JSON.parse(localStorage.getItem(k));}catch{}
+      if(!d||typeof d!=='object')return;
+      const lfSecs=Object.keys(d).filter(isLfSectionName);
+      if(!lfSecs.length)return;
+      let wl=[];
+      try{wl=JSON.parse(localStorage.getItem(WKEY+suffix))||[];}catch{}
+      if(!Array.isArray(wl))wl=[];
+      lfSecs.forEach(sec=>{
+        const items=d[sec];
+        if(Array.isArray(items)){
+          items.forEach(it=>{
+            if(!it||!it.name)return;
+            // Push the whole item object (preserves unknown fields, rule 2);
+            // merge duplicates by name, summing qty and keeping the hidden flag.
+            const ex=wl.find(i=>i.name&&i.name.toLowerCase()===it.name.toLowerCase());
+            if(ex){ex.qty+=it.qty||1;if(it.h&&!ex.h)ex.h=it.h;}
+            else wl.push(it);
+          });
+        }
+        delete d[sec];
+      });
+      localStorage.setItem(k,JSON.stringify(d));
+      localStorage.setItem(WKEY+suffix,JSON.stringify(wl));
+    });
+    localStorage.setItem(FLAG,'done');
+  }catch(e){console.warn('LF cleanup failed:',e);}
+})();
+
 function loadLayout(){
   try{const r=localStorage.getItem(profileKey(LKEY));return r?JSON.parse(r):{};}
   catch{return {};}
@@ -2617,6 +2761,7 @@ function refreshWin(sec){
   win.classList.toggle('win-empty',items.length===0);
   updateTotalDisplay();
   updateAllPcts();
+  updateHiddenCount();
   // BUGFIX: rebuilding the body wipes the search-hide classes from the rows,
   // so re-apply the active search filter once the new body is in the DOM.
   // Without this, +/−/delete/edit/add made the category show ALL items
@@ -2750,6 +2895,7 @@ function renderAll(){
   if(wlWin)canvas.appendChild(wlWin);
   if(mkWin)canvas.appendChild(mkWin);
   updateTotalDisplay();
+  updateHiddenCount();
   expandCanvas();
   // BUGFIX: re-apply the active search after a full re-render (undo, profile
   // switch, reset layout, import...) so filtered categories stay filtered.
@@ -2757,23 +2903,53 @@ function renderAll(){
   if(sq)doSearch(sq);
 }
 
-function expandCanvas(){
-  const wins=document.querySelectorAll('.win');
-  let maxY=0;
-  wins.forEach(w=>{const b=w.offsetTop+w.offsetHeight;if(b>maxY)maxY=b;});
-  document.getElementById('canvas').style.minHeight=(maxY+40)+'px';
+/* Drag/recovery caps (canvas-space): the page cannot scroll anymore, so a
+   window must never be able to leave the viewport with its header. y cap keeps
+   the header fully visible above the bottombar (80px); x cap keeps an 80px
+   grabbable slice of the header on screen. Computed from the canvas' live
+   offset — its top is NOT constant: the fixed topbar is 42px tall, but the
+   quick-add row2 adds its own height to #canvas' margin-top (refreshRow2). */
+function winCapX(){
+  const c=document.getElementById('canvas');
+  return Math.max(0,window.innerWidth-80-c.offsetLeft);
+}
+function winCapY(){
+  const c=document.getElementById('canvas');
+  return Math.max(0,window.innerHeight-80-c.offsetTop);
 }
 
-/* Recompute canvas height: called after collapse/expand, after renderAll,
-   after a window resize, and after loading saved layout. Prevents the
-   canvas from being too short (windows clipped at the bottom).
+function expandCanvas(){
+  // The page never scrolls (body overflow:hidden): the canvas always fills the
+  // viewport between topbar and bottombar. Growing it with the windows' maxY
+  // (old behavior) would only create a dead scroll area nobody can reach.
+  // Kept as the single hook called after render/drag/resize/collapse; it also
+  // pulls back windows whose saved position ended up outside the viewport
+  // (layouts saved before the no-scroll change, or a smaller screen) — view
+  // level only: nothing is written to the saved layout here.
+  const c=document.getElementById('canvas');
+  c.style.minHeight='calc(100vh - 74px)';
+  const capY=winCapY(),capX=winCapX();
+  document.querySelectorAll('.win').forEach(w=>{
+    if(w.offsetTop>capY)w.style.top=capY+'px';
+    if(w.offsetLeft>capX)w.style.left=capX+'px';
+  });
+}
+
+/* Recompute canvas geometry: called after collapse/expand, after renderAll,
+   after a window resize, and after loading saved layout. Keeps the canvas at
+   viewport size and pulls out-of-view windows back into reach.
    NOTE: this does NOT touch individual window sizes — users can resize
-   windows freely. Only the canvas minHeight is adjusted to fit all windows. */
+   windows freely. */
 function recomputeLayout(){
   expandCanvas();
 }
 
-window.addEventListener('resize',()=>{recomputeLayout();});
+// Resize listener: expandCanvas now depends on the viewport (canvas fills it,
+// stray windows are recovered), so viewport changes must recompute the caps.
+// Without it, shrinking the screen would leave windows permanently out of
+// reach — the page cannot scroll to them anymore (the old "no listener" note
+// from Task 22 review was correct only while expandCanvas ignored the viewport).
+window.addEventListener('resize',expandCanvas);
 
 function saveWinPos(sec,x,y,w,h){
   const l=loadLayout();
@@ -2799,8 +2975,8 @@ function makeDraggable(win,handle,sec){
   });
   document.addEventListener('mousemove',e=>{
     if(!dragging)return;
-    win.style.left=Math.max(0,e.clientX-dx)+'px';
-    win.style.top=Math.max(0,e.clientY-dy)+'px';
+    win.style.left=Math.max(0,Math.min(e.clientX-dx,winCapX()))+'px';
+    win.style.top=Math.max(0,Math.min(e.clientY-dy,winCapY()))+'px';
   });
   document.addEventListener('mouseup',()=>{
     if(!dragging)return;
@@ -2815,8 +2991,8 @@ function makeDraggable(win,handle,sec){
   document.addEventListener('touchmove',e=>{
     if(!dragging)return;
     const t=e.touches[0];
-    win.style.left=Math.max(0,t.clientX-dx)+'px';
-    win.style.top=Math.max(0,t.clientY-dy)+'px';
+    win.style.left=Math.max(0,Math.min(t.clientX-dx,winCapX()))+'px';
+    win.style.top=Math.max(0,Math.min(t.clientY-dy,winCapY()))+'px';
     e.preventDefault(); // prevent page scroll while dragging
   },{passive:false});
   document.addEventListener('touchend',()=>{
@@ -3089,8 +3265,8 @@ function makeMkDraggable(win,handle){
   });
   document.addEventListener('mousemove',e=>{
     if(!dragging)return;
-    win.style.left=Math.max(0,e.clientX-dx)+'px';
-    win.style.top=Math.max(0,e.clientY-dy)+'px';
+    win.style.left=Math.max(0,Math.min(e.clientX-dx,winCapX()))+'px';
+    win.style.top=Math.max(0,Math.min(e.clientY-dy,winCapY()))+'px';
   });
   document.addEventListener('mouseup',()=>{
     if(!dragging)return;
@@ -3106,8 +3282,8 @@ function makeMkDraggable(win,handle){
   document.addEventListener('touchmove',e=>{
     if(!dragging)return;
     const t=e.touches[0];
-    win.style.left=Math.max(0,t.clientX-dx)+'px';
-    win.style.top=Math.max(0,t.clientY-dy)+'px';
+    win.style.left=Math.max(0,Math.min(t.clientX-dx,winCapX()))+'px';
+    win.style.top=Math.max(0,Math.min(t.clientY-dy,winCapY()))+'px';
     e.preventDefault();
   },{passive:false});
   document.addEventListener('touchend',()=>{
@@ -3171,10 +3347,14 @@ function refreshRow2(){
   if(!anyVisible){
     row2.classList.remove('open');
     document.getElementById('canvas').style.marginTop='42px';
+    // canvas top shrank → the no-scroll caps changed, re-clamp the windows
+    expandCanvas();
   } else {
     // Need a small delay for row2 to render to get correct height
     requestAnimationFrame(()=>{
       document.getElementById('canvas').style.marginTop=(42+row2.offsetHeight)+'px';
+      // canvas top grew → re-clamp so no window ends up behind the bottombar
+      expandCanvas();
     });
   }
 }
@@ -3182,6 +3362,14 @@ document.addEventListener('click',e=>{
   if(!e.target.closest('.topbar-group')) closeAllMenus();
   // Close info box when clicking outside it
   if(!e.target.closest('#info-box-wrap')) closeInfoBox();
+  // Close the hidden-items panel when clicking outside it. #hidden-panel is
+  // a sibling of #hidden-wrap (avoids topbar stacking-context issues), so
+  // clicks INSIDE the panel must not close it — only outside clicks do.
+  // document.contains guard: panel actions re-render its innerHTML during the
+  // click dispatch, so the original target can arrive here detached — that is
+  // NOT an outside click and must not close the freshly re-rendered panel.
+  if(!document.contains(e.target))return;
+  if(!e.target.closest('#hidden-wrap')&&!e.target.closest('#hidden-panel')) closeHiddenPanel();
 });
 
 function resetLayout(){localStorage.removeItem(LKEY);renderAll();}
@@ -3197,9 +3385,12 @@ function exportTxt(){
     vis.forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   });
-  if(wl.length){
+  // Wishlist rows honor the H flag too (Task 21); skip the LF header
+  // entirely when every item is hidden (same rule as inventory sections).
+  const wlv=wl.filter(i=>!i.h);
+  if(wlv.length){
     lines.push('LF:');
-    wl.forEach(i=>lines.push(i.qty+'x '+i.name));
+    wlv.forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   }
   const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
@@ -3306,7 +3497,10 @@ function doImportTxt(input){
     let importLf=[];  // array of {name,qty} items, imported into wishlist
     const lines=text.split('\n');
     for(const raw of lines){
-      const line=raw.trim();
+      // Strip ANSI color codes BEFORE parsing (Task 22): ```ansi exports prefix
+      // headers like "\x1b[1;32mLF:" — unstripped, they'd parse as garbage
+      // categories instead of being recognized as headers/LF.
+      const line=raw.replace(/\x1b\[[0-9;]*m/g,'').trim();
       if(!line)continue;
       if(line.toUpperCase().startsWith('TOTAL:'))continue;
       if(/^[═─━\-╔╗╚╝║▀▄▌▐▒░▓█]$/.test(line))continue;
@@ -3319,12 +3513,17 @@ function doImportTxt(input){
       const tradingMatch=line.match(/^TRADING:\s*(.+)$/i);
       if(tradingMatch)continue;
 
-      // "LF:" header: route subsequent items to the wishlist instead of data
-      const lfMatch=line.match(/^LF:\s*(.+)$/i);
-      if(lfMatch){
+      // "LF:" / "Looking for:" header: route subsequent items to the wishlist
+      // instead of data. The header may be BARE (the app's own exports write
+      // "LF:" alone on its line, items on the next lines) — the old regex
+      // required content after the colon, so bare "LF:" fell through to the
+      // section parser and created an "LF" CATEGORY. Content on the same line
+      // is still honored as the first wishlist item; a bare "LF"/"Looking For"
+      // line (no colon) also switches to wishlist mode.
+      const lfMatch=line.match(/^(?:lf|looking\s+for)\s*:\s*(.*)$/i);
+      if(lfMatch||isLfSectionName(line)){
         curSec='__LF__';
-        // If the LF line has content after the colon, treat it as the first item
-        const rest=lfMatch[1].trim();
+        const rest=lfMatch?lfMatch[1].trim():'';
         if(rest){
           // Try "1x Item" format
           let itemMatch=rest.match(/^(\d+)\s*x\s+(.+)$/i);
@@ -3339,8 +3538,12 @@ function doImportTxt(input){
       if(secMatch){
         const secName=secMatch[1].trim();
         if(!/^\d/.test(secName)){
+          // Task 22 guard: an LF header that slipped past the checks above
+          // (e.g. "LookingFor:", "LF :") must NEVER become a category — it
+          // switches the parser to wishlist mode instead.
+          if(isLfSectionName(secName)){curSec='__LF__';continue;}
           curSec=secName;
-          if(curSec!=='__LF__'&&!data[curSec])data[curSec]=[];
+          if(!data[curSec])data[curSec]=[];
           continue;
         }
       }
@@ -3366,6 +3569,15 @@ function doImportTxt(input){
         }
       }
     }
+    // Safety net (Task 22): no matter how the text was shaped, the import can
+    // never leave an LF/looking-for CATEGORY in the inventory — any such
+    // section is dissolved into the wishlist before saving. Also lets an
+    // LF-only file count as valid data (wishlist-only import).
+    Object.keys(data).forEach(sec=>{
+      if(!isLfSectionName(sec))return;
+      (data[sec]||[]).forEach(it=>{if(it&&it.name)importLf.push(it);});
+      delete data[sec];
+    });
     if(Object.keys(data).length===0&&importLf.length===0){
       toast(t('noDataFound'));
       input.value='';
@@ -3415,11 +3627,12 @@ function buildDiscordMessageText(){
     [...items].filter(i=>!i.h).sort((a,b)=>a.name.toLowerCase().localeCompare(b.name.toLowerCase())).forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   });
-  // LF: wishlist items
+  // LF: wishlist items (H flag honored — Task 21)
   const wl=loadWishlist();
-  if(wl.length){
+  const wlv=wl.filter(i=>!i.h);
+  if(wlv.length){
     lines.push("\x1b[1;32mLF:");
-    wl.forEach(i=>lines.push(i.qty+'x '+i.name));
+    wlv.forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   }
   lines.push("```");
@@ -3449,9 +3662,10 @@ function buildDiscordPlainText(){
     lines.push('');
   });
   const wl=loadWishlist();
-  if(wl.length){
+  const wlv=wl.filter(i=>!i.h);
+  if(wlv.length){
     lines.push('LF:');
-    wl.forEach(i=>lines.push(i.qty+'x '+i.name));
+    wlv.forEach(i=>lines.push(i.qty+'x '+i.name));
     lines.push('');
   }
   return lines.join('\n').trim();
@@ -3686,8 +3900,8 @@ function makeTcDraggable(win,handle){
   });
   document.addEventListener('mousemove',e=>{
     if(!dragging)return;
-    win.style.left=Math.max(0,e.clientX-dx)+'px';
-    win.style.top=Math.max(0,e.clientY-dy)+'px';
+    win.style.left=Math.max(0,Math.min(e.clientX-dx,winCapX()))+'px';
+    win.style.top=Math.max(0,Math.min(e.clientY-dy,winCapY()))+'px';
   });
   document.addEventListener('mouseup',()=>{
     if(!dragging)return;
@@ -3702,8 +3916,8 @@ function makeTcDraggable(win,handle){
   document.addEventListener('touchmove',e=>{
     if(!dragging)return;
     const t=e.touches[0];
-    win.style.left=Math.max(0,t.clientX-dx)+'px';
-    win.style.top=Math.max(0,t.clientY-dy)+'px';
+    win.style.left=Math.max(0,Math.min(t.clientX-dx,winCapX()))+'px';
+    win.style.top=Math.max(0,Math.min(t.clientY-dy,winCapY()))+'px';
     e.preventDefault(); // prevent page scroll while dragging
   },{passive:false});
   document.addEventListener('touchend',()=>{
@@ -4210,6 +4424,10 @@ renderAll();
 updateTotalDisplay();
 applyLang();
 setTimeout(updateTotalDisplay, 500);
+// Init the H-excludes-value checkmark in the main menu (labels are synced by
+// applyLang; the icon is not i18n-driven). The hidden-items counter is
+// already initialized by renderAll() -> updateHiddenCount().
+syncHExcludeIcon();
 syncSheetValues();
 // Initialize My KAN badge display (load from localStorage)
 updateMyKanDisplay();
@@ -4367,6 +4585,7 @@ setTimeout(()=>{recomputeLayout();},200);
       row2.classList.add('open');
       requestAnimationFrame(()=>{
         document.getElementById('canvas').style.marginTop=(42+row2.offsetHeight)+'px';
+        expandCanvas(); // canvas top grew → re-clamp (page never scrolls)
       });
     }
   }
@@ -4576,7 +4795,7 @@ function buildThemeSettings(){
         applyTheme('shinigami');
       }
       buildThemeSettings();
-      showToast(t('customThemeDeleted'));
+      toast(t('customThemeDeleted'));
     };
     // Click card to apply
     card.onclick=()=>{ editingCustomId=ct.id; applyTheme(ct.id); setupCustomThemeEditor(); };
@@ -4664,7 +4883,7 @@ function setupCustomThemeEditor(){
       editingCustomId=id;
       applyTheme(id);
       buildThemeSettings();
-      showToast(t('customThemeSaved'));
+      toast(t('customThemeSaved'));
     };
   }
   // Delete button
@@ -4679,7 +4898,7 @@ function setupCustomThemeEditor(){
       editingCustomId=null;
       applyTheme('shinigami');
       buildThemeSettings();
-      showToast(t('customThemeDeleted'));
+      toast(t('customThemeDeleted'));
     };
   }
 }
@@ -4836,17 +5055,133 @@ function updateDiscordPreview(){
     });
     html+=`<div style="margin-top:2px"></div>`;
   });
-  // LF from wishlist
+  // LF from wishlist (H flag honored — Task 21)
   const wl=loadWishlist();
-  if(wl.length){
+  const wlv=wl.filter(i=>!i.h);
+  if(wlv.length){
     html+=`<div class="disc-prev-section" style="color:var(--val-green)">LF:</div>`;
-    wl.forEach(i=>{
+    wlv.forEach(i=>{
       html+=`<div class="disc-prev-item">${escHtml(i.qty+'x '+i.name)}</div>`;
     });
   }
   preview.innerHTML=html;
 }
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+/* ===== HIDDEN ITEMS (H) COUNTER + REACTIVATE PANEL =====
+   Users can forget which items they flagged with H. A topbar counter appears
+   only when at least one hidden item exists (inventory or wishlist); the
+   popup lists them grouped with per-item and bulk reactivation. */
+function hiddenInvItems(){
+  const d=loadData();const out=[];
+  Object.keys(d).forEach(sec=>(d[sec]||[]).forEach(it=>{
+    if(it&&it.h)out.push({sec,name:it.name,qty:typeof it.qty==='number'?it.qty:1});
+  }));
+  return out;
+}
+function hiddenLfItems(){return loadWishlist().filter(i=>i&&i.h);}
+function updateHiddenCount(){
+  const n=hiddenInvItems().length+hiddenLfItems().length;
+  const btn=document.getElementById('hidden-btn');
+  const c=document.getElementById('hidden-count');
+  if(c)c.textContent=n;
+  if(btn){
+    // '' restores the CSS default (.tbtn) — the button starts display:none inline
+    btn.style.display=n>0?'':'none';
+    btn.title=t('hiddenCountTitle');
+  }
+}
+function toggleHiddenPanel(){
+  const p=document.getElementById('hidden-panel');
+  if(!p)return;
+  if(p.classList.contains('open')){p.classList.remove('open');return;}
+  renderHiddenPanel();
+  p.classList.add('open');
+  // Position under the counter button — measure AFTER opening (display:none
+  // elements have offsetWidth 0)
+  const btn=document.getElementById('hidden-btn');
+  if(btn){
+    const r=btn.getBoundingClientRect();
+    const w=p.offsetWidth||280;
+    p.style.top=(r.bottom+6)+'px';
+    p.style.left=Math.max(8,Math.min(r.left,window.innerWidth-w-8))+'px';
+  }
+}
+function closeHiddenPanel(){
+  const p=document.getElementById('hidden-panel');
+  if(p)p.classList.remove('open');
+}
+function renderHiddenPanel(){
+  const p=document.getElementById('hidden-panel');
+  if(!p)return;
+  const inv=hiddenInvItems(),lf=hiddenLfItems();
+  let html='<div class="hp-title">'+t('hiddenPanelTitle')+'</div>';
+  if(inv.length){
+    html+='<div class="hp-group-title">'+t('hiddenGroupInv')+'</div>';
+    inv.forEach(it=>{
+      html+='<div class="hp-row"><span class="hp-sec">'+escHtml(it.sec)+'</span><span class="hp-name">'+escHtml(it.name)+'</span><span class="hp-qty">\u00d7'+it.qty+'</span><button class="hp-react" data-kind="inv" data-sec="'+escHtml(it.sec)+'" data-name="'+escHtml(it.name)+'" onclick="reactivateHidden(this.dataset.kind,this)">'+t('hiddenReactivate')+'</button></div>';
+    });
+    html+='<button class="hp-all" onclick="reactivateAllHidden(\'inv\')">'+t('hiddenReactivateAll')+'</button>';
+  }
+  if(lf.length){
+    html+='<div class="hp-group-title">'+t('hiddenGroupLf')+'</div>';
+    lf.forEach(it=>{
+      html+='<div class="hp-row"><span class="hp-sec">LF</span><span class="hp-name">'+escHtml(it.name)+'</span><span class="hp-qty">\u00d7'+it.qty+'</span><button class="hp-react" data-kind="lf" data-name="'+escHtml(it.name)+'" onclick="reactivateHidden(this.dataset.kind,this)">'+t('hiddenReactivate')+'</button></div>';
+    });
+    html+='<button class="hp-all" onclick="reactivateAllHidden(\'lf\')">'+t('hiddenReactivateAll')+'</button>';
+  }
+  p.innerHTML=html;
+}
+function reactivateHidden(kind,btn){
+  const name=(btn.dataset.name||'').toLowerCase();
+  if(kind==='inv'){
+    const d=loadData();
+    // Prefer the section shown in the panel, but fall back to a global scan:
+    // the item may have been drag-moved since the panel was rendered.
+    let hit=null;
+    const sec=btn.dataset.sec;
+    if(sec&&d[sec]){
+      const idx=d[sec].findIndex(i=>i.name.toLowerCase()===name);
+      if(idx!==-1)hit={sec:sec,idx:idx};
+    }
+    if(!hit){
+      for(const s2 of Object.keys(d)){
+        const idx=(d[s2]||[]).findIndex(i=>i.name.toLowerCase()===name);
+        if(idx!==-1){hit={sec:s2,idx:idx};break;}
+      }
+    }
+    if(!hit)return;
+    pushUndo();
+    delete d[hit.sec][hit.idx].h;
+    saveData(d);refreshWin(hit.sec);
+  } else {
+    const w=loadWishlist();
+    const ri=w.findIndex(i=>i.name.toLowerCase()===name);
+    if(ri===-1)return;
+    delete w[ri].h;
+    saveWishlist(w);refreshWishlist();
+  }
+  updateHiddenCount();renderHiddenPanel();
+}
+function reactivateAllHidden(kind){
+  if(kind==='inv'){
+    const d=loadData();
+    let any=false;
+    Object.keys(d).forEach(s2=>(d[s2]||[]).forEach(it=>{if(it&&it.h)any=true;}));
+    if(!any)return;
+    pushUndo();
+    Object.keys(d).forEach(s2=>(d[s2]||[]).forEach(it=>{if(it&&it.h)delete it.h;}));
+    saveData(d);renderAll();
+  } else {
+    const w=loadWishlist();
+    let any=false;
+    w.forEach(i=>{if(i&&i.h)any=true;});
+    if(!any)return;
+    w.forEach(i=>{if(i&&i.h)delete i.h;});
+    saveWishlist(w);refreshWishlist();
+  }
+  updateHiddenCount();renderHiddenPanel();
+}
 /* Security: only allow safe color syntaxes (hex like #rgb/#rrggbb[aa]) into
    style attributes. Anything else (potentially injected via tampered
    localStorage, e.g. custom theme data) falls back to a neutral gray. */
@@ -4916,7 +5251,7 @@ function stepEl(id,delta){
 function stepQty(id,delta){stepEl(id,delta);}
 
 /* ===== WISHLIST (LF) ===== */
-const WL_KEY='bleach_wishlist_v1';
+// WL_KEY is declared up in the DATA section (before migrateInventory runs).
 // wlWin and wlVisible are declared earlier (near tcWin) to avoid TDZ issues
 // when renderAll() runs before this point in the file.
 const WL_POS_KEY='bleach_wl_pos_v1';
@@ -4938,6 +5273,9 @@ function toggleWishlist(btn){
   btn.classList.toggle('active',wlVisible);
   if(wlVisible){
     if(!wlWin)buildWishlistWin();
+    // Reopen of an existing window: refresh content — rows/LF total may be
+    // stale (e.g. the H-excludes-value option was toggled while closed).
+    else refreshWishlist();
     wlWin.style.display='';
   } else {
     if(wlWin)wlWin.style.display='none';
@@ -5033,6 +5371,8 @@ function buildWishlistWin(){
 function refreshWishlist(){
   if(!wlWin)return;
   const wl=loadWishlist();
+  // Keep the topbar hidden-items counter in sync (wishlist rows honor H too)
+  updateHiddenCount();
   // Query inside wlWin (works even if detached from document by renderAll)
   const body=wlWin.querySelector('#wl-body');
   const countEl=wlWin.querySelector('#wl-count');
@@ -5055,10 +5395,20 @@ function refreshWishlist(){
     const tier=valueTier(val);
     const valText=val>0?formatValue(val):'--';
     const row=document.createElement('div');
-    row.className='wl-item';
+    row.className='wl-item'+(item.h?' h-x':'');
     row.draggable=true;
     row.dataset.idx=idx;
-    row.innerHTML=`<span class="wl-item-grip" title="${t('dragToReorder')||'Drag to reorder'}">⠿</span><span class="wl-item-name">${escHtml(item.name)}</span><span class="wl-item-val ${tier}">${valText}</span><span class="wl-item-qty">\u00d7${item.qty}</span><button class="wl-item-del">\u2715</button>`;
+    row.innerHTML=`<span class="wl-item-grip" title="${t('dragToReorder')||'Drag to reorder'}">⠿</span><span class="wl-item-name">${escHtml(item.name)}</span><span class="wl-item-val ${tier}">${valText}</span><button class="btn-h${item.h?' on':''}" title="${t('hideExportHint')}">H</button><span class="wl-item-qty">\u00d7${item.qty}</span><button class="wl-item-del">\u2715</button>`;
+    // "H" toggle: same semantics as inventory rows — hides the item from
+    // TEXT exports (exportTxt + Discord copies + preview). The wishlist has
+    // no undo stack (consistent with add/delete), so no pushUndo here.
+    row.querySelector('.btn-h').onclick=()=>{
+      const w=loadWishlist();
+      const ri=w.findIndex(i=>i.name.toLowerCase()===item.name.toLowerCase());
+      if(ri===-1)return;
+      if(w[ri].h)delete w[ri].h;else w[ri].h=1;
+      saveWishlist(w);refreshWishlist();
+    };
     row.querySelector('.wl-item-del').onclick=()=>{
       const w=loadWishlist();
       const ri=w.findIndex(i=>i.name.toLowerCase()===item.name.toLowerCase());
@@ -5102,7 +5452,10 @@ function refreshWishlist(){
   });
 
   let total=0;
-  wl.forEach(i=>{total+=getTradeValue(i.name)*i.qty;});
+  // LF total follows the "H also excludes from value" option, so the number
+  // in the window matches the exported LF value under the same setting.
+  const exclVal=hExcludeValueOn();
+  wl.forEach(i=>{if(exclVal&&i.h)return;total+=getTradeValue(i.name)*i.qty;});
   totalEl.textContent=total>0?t('lfTotal')+' '+formatValue(total):'';
 }
 
